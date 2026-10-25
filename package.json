@@ -1,0 +1,24 @@
+{
+  "name": "vibehq",
+  "version": "0.1.0",
+  "description": "Autonomous Multi-Agent Virtual Headquarters & Procedural Isometric Visualizer for Vibe Coding",
+  "main": "bin/vibehq.js",
+  "bin": {
+    "vibehq": "./bin/vibehq.js"
+  },
+  "scripts": {
+    "start": "node bin/vibehq.js start",
+    "init": "node bin/vibehq.js init"
+  },
+  "keywords": [
+    "ai-agents",
+    "vibe-coding",
+    "claude-code",
+    "isometric",
+    "virtual-office",
+    "subagents",
+    "antigravity"
+  ],
+  "author": "VibeHQ Core Team",
+  "license": "MIT"
+}

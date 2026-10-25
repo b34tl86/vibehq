@@ -1,0 +1,3373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Project Keevah — Virtual Agent Office Studio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    @font-face {
+      font-family: 'PixelFont';
+      src: local('Courier New'), monospace;
+    }
+    .pixelated {
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
+    ::-webkit-scrollbar-thumb { background: rgba(51, 65, 85, 0.8); rounded: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(71, 85, 105, 1); }
+  </style>
+</head>
+<body class="bg-[var(--background,#090d16)] text-[var(--foreground,#f8fafc)] font-sans antialiased min-h-screen p-3 md:p-6 select-none transition-colors duration-200">
+
+  <div class="max-w-7xl mx-auto space-y-4">
+
+    <!-- Top Studio Header -->
+    <div class="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-xl backdrop-blur-md">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center text-2xl shadow-lg shadow-indigo-500/20">
+          🏢
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-lg md:text-xl font-black tracking-tight bg-gradient-to-r from-slate-100 via-indigo-200 to-pink-300 bg-clip-text text-transparent">
+              Keevah Agent Headquarters
+            </h1>
+            <span id="conn-badge" class="px-2 py-0.5 text-[11px] font-mono font-bold rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5 animate-pulse">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> LIVE SYNC
+            </span>
+          </div>
+          <div class="text-xs text-slate-400 flex flex-wrap items-center gap-3 mt-0.5 font-mono">
+            <span>Branch: <b id="branch-name" class="text-slate-200">feat/react-dashboard</b></span>
+            <span>•</span>
+            <span>Arch: <span id="model-name" class="text-indigo-400 font-bold">Claude Opus 5.5</span></span>
+            <span>•</span>
+            <span class="text-emerald-400">⚡ Speech Bubbles Active</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Action Buttons -->
+      <div class="flex flex-wrap items-center gap-2 text-xs font-mono">
+        <button id="btn-coffee" class="px-3 py-1.5 rounded-lg bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/30 transition-all flex items-center gap-1.5 active:scale-95 shadow-sm">
+          <span>☕</span> Coffee Break
+        </button>
+        <button id="btn-deploy" class="px-3 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 transition-all flex items-center gap-1.5 active:scale-95 shadow-sm">
+          <span>🚀</span> Deploy Release
+        </button>
+        <button id="btn-expand" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-all flex items-center gap-1.5 active:scale-95">
+          <span id="expand-icon">⛶</span> Expand Studio
+        </button>
+        <button id="btn-light" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors" title="Toggle Lighting (Day / Night)">
+          <span id="light-icon">🌙</span>
+        </button>
+        <button id="btn-crt" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors" title="Toggle Retro CRT Scanlines">
+          <span id="crt-icon">📺</span>
+        </button>
+        <button id="btn-audio" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors" title="Toggle 8-bit Audio">
+          <span id="audio-icon">🔇</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Active Live Workers Ticker -->
+    <div id="active-work-bar" class="p-3 rounded-xl bg-slate-900/80 border border-slate-800/80 flex flex-wrap items-center justify-between gap-3 text-xs font-mono shadow-inner">
+      <div class="flex items-center gap-2 overflow-x-auto">
+        <span class="flex h-2.5 w-2.5 relative shrink-0">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+        </span>
+        <span class="font-bold text-slate-300 shrink-0">LIVE ACTIVITY:</span>
+        <div id="active-workers-pills" class="flex items-center gap-2">
+          <!-- Dynamically populated live action pills -->
+        </div>
+      </div>
+      <div class="flex items-center gap-3 shrink-0">
+        <div class="flex items-center gap-1 bg-slate-950/80 border border-slate-700/80 rounded-lg p-0.5 text-[11px] font-mono">
+          <span class="text-slate-400 px-1.5 flex items-center gap-1">💬 Bubbles:</span>
+          <button id="bubble-mode-smart" class="px-2 py-0.5 rounded bg-indigo-600 font-bold text-white transition-all shadow-sm">Smart</button>
+          <button id="bubble-mode-active" class="px-2 py-0.5 rounded hover:bg-white/10 text-slate-400 transition-all">Active</button>
+          <button id="bubble-mode-all" class="px-2 py-0.5 rounded hover:bg-white/10 text-slate-400 transition-all">All</button>
+        </div>
+        <!-- Department Quick-Focus Selector -->
+        <div class="hidden lg:flex items-center gap-1.5 pl-3 border-l border-slate-800 text-xs">
+          <span class="text-slate-500 text-[10px] font-semibold uppercase tracking-wider">Focus:</span>
+          <button class="nav-focus px-2 py-0.5 rounded bg-slate-900 border border-slate-700 hover:bg-slate-800 text-slate-300 text-[11px] font-medium" data-target="all">🏢 All HQ</button>
+          <button class="nav-focus px-2 py-0.5 rounded bg-slate-900 border border-amber-500/40 hover:bg-amber-500/10 text-amber-400 text-[11px] font-medium" data-target="claude">👑 Claude</button>
+          <button class="nav-focus px-2 py-0.5 rounded bg-slate-900 border border-rose-500/40 hover:bg-rose-500/10 text-rose-400 text-[11px] font-medium" data-target="ava">🎨 Ava</button>
+          <button class="nav-focus px-2 py-0.5 rounded bg-slate-900 border border-emerald-500/40 hover:bg-emerald-500/10 text-emerald-400 text-[11px] font-medium" data-target="hunter">🥷 Hunter</button>
+          <button class="nav-focus px-2 py-0.5 rounded bg-slate-900 border border-amber-500/40 hover:bg-amber-500/10 text-amber-300 text-[11px] font-medium" data-target="archie">📜 Archie (Docs)</button>
+          <button class="nav-focus px-2 py-0.5 rounded bg-slate-900 border border-cyan-500/40 hover:bg-cyan-500/10 text-cyan-400 text-[11px] font-medium" data-target="victor">🧪 Victor (QA)</button>
+          <button class="nav-focus px-2 py-0.5 rounded bg-slate-900 border border-blue-500/40 hover:bg-blue-500/10 text-blue-400 text-[11px] font-medium" data-target="bullpen">⚡ Bullpen</button>
+          <button class="nav-focus px-2 py-0.5 rounded bg-slate-900 border border-cyan-500/40 hover:bg-cyan-500/10 text-cyan-400 text-[11px] font-medium" data-target="server">🗄️ Servers</button>
+          <button class="nav-focus px-2 py-0.5 rounded bg-slate-900 border border-purple-500/40 hover:bg-purple-500/10 text-purple-400 text-[11px] font-medium" data-target="warroom">🤝 War Room</button>
+          <button class="nav-focus px-2 py-0.5 rounded bg-slate-900 border border-amber-600/40 hover:bg-amber-600/10 text-amber-300 text-[11px] font-medium" data-target="lounge">☕ Lounge</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Canvas Viewport -->
+    <div id="viewport-box" class="relative w-full rounded-2xl overflow-hidden border border-slate-800 bg-[#070b12] shadow-2xl select-none transition-all">
+      <canvas id="officeCanvas" class="w-full block pixelated cursor-grab active:cursor-grabbing" style="height: 820px;"></canvas>
+
+      <!-- Selected Agent HUD Inspector (Top-Left) -->
+      <div id="agent-hud" class="absolute top-3 left-3 bg-slate-900/95 backdrop-blur-md border border-slate-700/80 rounded-xl p-3 text-white max-w-sm transition-all duration-200 pointer-events-auto shadow-2xl flex items-start gap-3">
+        <div id="hud-avatar" class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shrink-0 border border-white/20 bg-slate-800 shadow-inner">
+          👑
+        </div>
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center justify-between gap-1">
+            <span id="hud-name" class="font-bold text-sm text-slate-100 truncate">Claude</span>
+            <span id="hud-status-badge" class="text-[10px] px-2 py-0.5 rounded-full font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 animate-pulse">
+              ● WORKING
+            </span>
+          </div>
+          <div id="hud-role" class="text-xs text-slate-400 truncate">Lead Architect (Opus 5.5)</div>
+          <div id="hud-task" class="text-xs text-amber-300 font-mono mt-1 line-clamp-2">"Waiting for tool execution..."</div>
+          <div id="hud-submeta" class="text-[10px] text-slate-400 mt-1.5 font-mono flex items-center gap-3 pt-1 border-t border-slate-800">
+            <span>📦 <span id="hud-files">6 files</span></span>
+            <span>⚡ <span id="hud-tools">41 calls</span></span>
+            <span id="hud-tool-tag" class="text-emerald-400 font-bold">tool: Bash</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Zoom & Speed Controls Floating Toolbar (Bottom-Right) -->
+      <div class="absolute bottom-3 right-3 flex items-center gap-2 bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-xl p-1.5 text-white shadow-xl">
+        <div class="flex items-center gap-1 pr-2 border-r border-slate-800">
+          <button id="zoom-out" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10 text-sm font-bold text-slate-300 active:scale-95" title="Zoom Out">−</button>
+          <span id="zoom-level" class="text-xs font-mono font-bold text-slate-200 w-11 text-center">100%</span>
+          <button id="zoom-in" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10 text-sm font-bold text-slate-300 active:scale-95" title="Zoom In">+</button>
+          <button id="zoom-reset" class="px-2 py-0.5 text-[11px] font-mono rounded hover:bg-white/10 text-slate-400" title="Reset View">Reset</button>
+        </div>
+
+        <div class="flex items-center gap-1">
+          <button data-speed="0.5" class="speed-btn px-2 py-0.5 text-xs rounded hover:bg-white/10 text-slate-400">0.5x</button>
+          <button data-speed="1" class="speed-btn px-2 py-0.5 text-xs rounded bg-white/20 font-bold text-white">1x</button>
+          <button data-speed="2" class="speed-btn px-2 py-0.5 text-xs rounded hover:bg-white/10 text-slate-400">2x</button>
+          <button id="btn-pause" class="px-2 py-0.5 text-xs rounded hover:bg-white/10 text-slate-300">⏸️</button>
+        </div>
+      </div>
+
+      <!-- Live Git Toast in Viewport (Bottom-Left) -->
+      <div id="git-toast" class="absolute bottom-3 left-3 flex items-center gap-2 bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-lg px-3 py-1.5 text-xs text-slate-200 font-mono shadow-lg max-w-md truncate">
+        <span class="text-emerald-400 font-bold">● git:</span>
+        <span id="git-commit-msg" class="truncate text-slate-300">e793df4: dashboard telemetry initialized</span>
+      </div>
+
+      <!-- Room Legend Pills (Top-Right) -->
+      <div class="absolute top-3 right-3 hidden xl:flex items-center gap-2 bg-slate-900/85 backdrop-blur-sm border border-slate-800 rounded-xl px-3 py-1.5 text-[11px] text-slate-300 font-mono">
+        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> Executive</span>
+        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span> Ava Studio</span>
+        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Hunter SOC</span>
+        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-cyan-500"></span> Victor QA</span>
+        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Bullpen</span>
+        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span> Data Vault</span>
+        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> War Room</span>
+      </div>
+    </div>
+
+    <!-- Bottom Grids: Squad Roster & Live Event Stream -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      
+      <!-- Squad Cards Grid -->
+      <div class="lg:col-span-2 space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <h2 class="text-sm font-bold tracking-tight uppercase text-slate-400 flex items-center gap-2 font-mono">
+              <span>👥</span> Engineering Squad Roster (<span id="agent-count">7</span>)
+            </h2>
+            <div class="flex items-center gap-1 font-mono text-[11px]">
+              <button id="filter-all" class="px-2 py-0.5 rounded bg-white/10 text-white font-bold">All</button>
+              <button id="filter-active" class="px-2 py-0.5 rounded text-slate-400 hover:text-white">⚡ Working (<span id="filter-active-count">1</span>)</button>
+              <button id="filter-done" class="px-2 py-0.5 rounded text-slate-400 hover:text-white">✓ Done</button>
+            </div>
+          </div>
+          <span class="text-xs text-slate-500 font-mono">Click any agent to inspect station</span>
+        </div>
+
+        <div id="squad-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+          <!-- Dynamically populated squad cards -->
+        </div>
+      </div>
+
+      <!-- Live Tool Terminal Feed -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between">
+          <h2 class="text-sm font-bold tracking-tight uppercase text-slate-400 flex items-center gap-2 font-mono">
+            <span>⚡</span> Real-Time Tool Stream
+          </h2>
+          <span id="tool-counter" class="text-xs font-mono text-emerald-400 font-bold">0 tool calls</span>
+        </div>
+
+        <div id="terminal-box" class="h-[280px] rounded-xl bg-slate-950 border border-slate-800 p-3 font-mono text-xs overflow-y-auto space-y-2 shadow-inner">
+          <div id="terminal-body" class="space-y-1.5 text-slate-400">
+            <div class="text-slate-500 text-[11px]">[SYS] Office telemetry initialized. Ready for agent actions.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // --- 1. Sound FX System ---
+    class SoundFX {
+      constructor() {
+        this.ctx = null;
+        this.enabled = false;
+      }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) this.ctx = new AudioContext();
+        }
+      }
+      toggle() {
+        this.enabled = !this.enabled;
+        if (this.enabled) this.init();
+        return this.enabled;
+      }
+      playTyping() {
+        if (!this.enabled || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(320 + Math.random() * 260, now);
+        gain.gain.setValueAtTime(0.015, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.04);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.04);
+      }
+      playCoffee() {
+        if (!this.enabled || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(140, now);
+        osc.frequency.linearRampToValueAtTime(280, now + 0.3);
+        gain.gain.setValueAtTime(0.03, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.35);
+      }
+      playChime() {
+        if (!this.enabled || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(587.33, now); // D5
+        osc.frequency.setValueAtTime(880.00, now + 0.1); // A5
+        gain.gain.setValueAtTime(0.05, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.3);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.3);
+      }
+    }
+    const sound = new SoundFX();
+
+    // --- 2. Spacious 18x16 Multi-Room Isometric Studio Layout ---
+    const GRID_W = 24;
+    const GRID_H = 20;
+    const TILE_W = 64;
+    const TILE_H = 32;
+
+    // Room boundaries:
+    const ROOMS = {
+      lounge: { name: "Café & Lounge", x1: 1, y1: 1, x2: 6, y2: 6 },
+      executive: { name: "Executive Suite (Claude)", x1: 7, y1: 1, x2: 14, y2: 6 },
+      serverVault: { name: "Data Vault (Server Room)", x1: 15, y1: 1, x2: 23, y2: 6 },
+      uiStudio: { name: "UI Design Studio (Ava)", x1: 1, y1: 7, x2: 6, y2: 13 },
+      bullpen: { name: "Engineering Bullpen (Felix & Archie)", x1: 7, y1: 7, x2: 15, y2: 13 },
+      qaLab: { name: "QA & Telecom Lab (Victor & Tally)", x1: 16, y1: 7, x2: 23, y2: 13 },
+      socLab: { name: "Cyber SOC Lab (Hunter)", x1: 1, y1: 14, x2: 8, y2: 19 },
+      warRoom: { name: "Executive War Room Amphitheater", x1: 9, y1: 14, x2: 23, y2: 19 },
+    };
+
+    // Generously Spaced Workstation Desks across 24x20 Campus:
+    const DESK_SLOTS = [
+      { x: 10.5, y: 3.5, name: "Executive Lead Desk", zone: "executive", agentName: "Claude" },
+      { x: 18.0, y: 8.5, name: "Telecom Ops Desk", zone: "qaLab", agentName: "Tally" },
+      { x: 18.0, y: 11.5, name: "QA Lab Desk", zone: "qaLab", agentName: "Victor" },
+      { x: 3.5, y: 10.0, name: "UI Design Lead Desk", zone: "uiStudio", agentName: "Ava" },
+      { x: 9.5, y: 9.5, name: "Backend Core Desk", zone: "bullpen", agentName: "Felix" },
+      { x: 13.0, y: 11.0, name: "Documentation & Code Chronicler Desk", zone: "bullpen", agentName: "Archie" },
+      { x: 4.5, y: 16.5, name: "Cyber SOC Command Desk", zone: "socLab", agentName: "Hunter" },
+    ];
+
+    function getDeskSeat(desk) {
+      return { x: desk.x - 0.35, y: desk.y - 0.35 };
+    }
+
+    const DEDICATED_DESKS = {
+      "Claude": DESK_SLOTS[0],
+      "Tally": DESK_SLOTS[1],
+      "Victor": DESK_SLOTS[2],
+      "Ava": DESK_SLOTS[3],
+      "Felix": DESK_SLOTS[4],
+      "Archie": DESK_SLOTS[5],
+      "Hunter": DESK_SLOTS[6],
+    };
+
+    // Campus-Wide Distributed Subagent Stations (Naturally Dispersed Across All Wings):
+    const EXTRA_SEATS = [
+      { x: 9.5, y: 12.0, name: "Bullpen Pair Bench 1", zone: "bullpen" },
+      { x: 15.0, y: 15.0, name: "War Room North Station 1", zone: "warRoom" },
+      { x: 2.5, y: 4.8, name: "Café Bistro Table 1", zone: "lounge" },
+      { x: 5.2, y: 11.5, name: "UI Prototyping Bench", zone: "uiStudio" },
+      { x: 21.5, y: 10.0, name: "QA Secondary Bench", zone: "qaLab" },
+      { x: 19.0, y: 18.0, name: "War Room South Station 2", zone: "warRoom" },
+      { x: 13.0, y: 8.5, name: "Bullpen Pair Bench 2", zone: "bullpen" },
+      { x: 5.2, y: 3.2, name: "Espresso Bar Stool", zone: "lounge" },
+      { x: 12.0, y: 16.5, name: "War Room West Station", zone: "warRoom" },
+      { x: 21.5, y: 16.5, name: "War Room East Station", zone: "warRoom" },
+      { x: 19.0, y: 15.0, name: "War Room North Station 2", zone: "warRoom" },
+      { x: 15.0, y: 18.0, name: "War Room South Station 1", zone: "warRoom" },
+    ];
+
+    // Room POIs & Interactive Prop Targets:
+    const POIS = {
+      coffeeMachine: { x: 2.8, y: 2.8, label: 'Espresso Bar' },
+      waterCooler: { x: 5.5, y: 2.0, label: 'Water Dispenser' },
+      loungeSofa: { x: 3.5, y: 5.2, label: 'Lounge Sofa' },
+      whiteboard: { x: 10.5, y: 1.0, label: 'Architecture Board' },
+      blueprintTable: { x: 7.5, y: 2.5, label: 'Drafting Table' },
+      avaEasel: { x: 2.0, y: 8.0, label: 'UI Style Easel' },
+      swatchBoard: { x: 1.2, y: 11.0, label: 'Palette Swatches' },
+      serverRack1: { x: 17.0, y: 2.2, label: 'Web Cluster 01' },
+      serverRack2: { x: 19.0, y: 2.2, label: 'Database SAN' },
+      serverRack3: { x: 21.0, y: 2.2, label: 'AI Compute H100' },
+      serverCooler: { x: 17.0, y: 4.5, label: 'CRAC Chiller Unit' },
+      serverRack4: { x: 19.0, y: 4.5, label: 'Telecom PBX Core' },
+      serverRack5: { x: 21.0, y: 4.5, label: 'Storage SAN Backup' },
+      kanban: { x: 11.0, y: 7.0, label: 'Sprint Kanban' },
+      confTable: { x: 16.5, y: 16.5, label: 'Conference Table' },
+      socRadar: { x: 2.2, y: 15.0, label: 'Threat Radar' },
+    };
+
+    // Primary Orchestrator (Claude Lead)
+    const claudeOrchestrator = {
+      id: 'claude-lead',
+      name: 'Claude',
+      role: 'Lead Architect (Opus 5.5)',
+      avatar: '👑',
+      color: '#3b82f6',
+      shirtColor: '#2563eb',
+      pantsColor: '#0f172a',
+      hairColor: '#93c5fd',
+      desk: DESK_SLOTS[0],
+      currentPos: getDeskSeat(DESK_SLOTS[0]),
+      targetPos: getDeskSeat(DESK_SLOTS[0]),
+      state: 'thinking',
+      status: 'idle',
+      isWorking: false,
+      thought: 'Lead Architect standing by. Architecture & squad synced.',
+      tool: 'Idle',
+      currentAction: 'Standing by (Lead Architect)',
+      files: ['CLAUDE.md', 'main.py'],
+      toolCount: 41,
+      isPrimary: true,
+    };
+
+    // Core Squad Members with Locked Dedicated Workstations:
+    const INITIAL_SUBAGENTS = [
+      {
+        id: 'adbdfbf41a82204d2',
+        name: 'Tally',
+        role: 'Hourly Call Tally & Analytics',
+        avatar: '📊',
+        color: '#10b981',
+        shirtColor: '#10b981',
+        pantsColor: '#1e293b',
+        hairColor: '#a7f3d0',
+        desk: DESK_SLOTS[1],
+        currentPos: getDeskSeat(DESK_SLOTS[1]),
+        targetPos: getDeskSeat(DESK_SLOTS[1]),
+        state: 'thinking',
+        status: 'idle',
+        isWorking: false,
+        thought: 'Telecom metrics & hourly rollups synced. Standing by.',
+        tool: 'Idle',
+        currentAction: 'Standing by (Telecom Synced)',
+        files: ['call_tally.py', 'test_call_tally.py', 'call_service.py'],
+        toolCount: 13,
+        isPrimary: false,
+      },
+      {
+        id: 'ad686272dc43358ff',
+        name: 'Victor',
+        role: 'Bug & Safety Auditor',
+        avatar: '🧪',
+        color: '#06b6d4',
+        shirtColor: '#06b6d4',
+        pantsColor: '#0f172a',
+        hairColor: '#a5f3fc',
+        desk: DESK_SLOTS[2],
+        currentPos: getDeskSeat(DESK_SLOTS[2]),
+        targetPos: getDeskSeat(DESK_SLOTS[2]),
+        state: 'thinking',
+        status: 'completed',
+        isWorking: false,
+        thought: 'Completed: Audited verification codes and edge cases',
+        tool: 'SubagentHandback',
+        currentAction: 'Handback (Verified)',
+        files: ['sign_in.py', 'two_step.py', 'verification_codes.py'],
+        toolCount: 30,
+        isPrimary: false,
+      },
+      {
+        id: 'a980bcf2060c56a57',
+        name: 'Ava',
+        role: 'Lead Frontend & UI/UX Designer',
+        avatar: '🎨',
+        color: '#f43f5e',
+        shirtColor: '#f43f5e',
+        pantsColor: '#0f172a',
+        hairColor: '#fecdd3',
+        desk: DESK_SLOTS[3],
+        currentPos: getDeskSeat(DESK_SLOTS[3]),
+        targetPos: getDeskSeat(DESK_SLOTS[3]),
+        state: 'thinking',
+        status: 'idle',
+        isWorking: false,
+        thought: 'UI design system and tokens up to date. Standing by.',
+        tool: 'Idle',
+        currentAction: 'Standing by (Design Synced)',
+        files: ['LoginPage.tsx', 'Sparkline.tsx', 'StatusPill.tsx'],
+        toolCount: 78,
+        isPrimary: false,
+      },
+      {
+        id: 'af5def6c54ecbe5cd',
+        name: 'Felix',
+        role: 'Full-Stack Backend Engineer',
+        avatar: '⚡',
+        color: '#8b5cf6',
+        shirtColor: '#8b5cf6',
+        pantsColor: '#1e293b',
+        hairColor: '#ddd6fe',
+        desk: DESK_SLOTS[4],
+        currentPos: getDeskSeat(DESK_SLOTS[4]),
+        targetPos: getDeskSeat(DESK_SLOTS[4]),
+        state: 'thinking',
+        status: 'completed',
+        isWorking: false,
+        thought: 'Completed: Wired FastAPI endpoints & query filters',
+        tool: 'SubagentHandback',
+        currentAction: 'Handback (Verified)',
+        files: ['main.py', 'tenants.py', 'auth.py'],
+        toolCount: 24,
+        isPrimary: false,
+      },
+      {
+        id: 'a37a0e51cbc9e295d',
+        name: 'Archie',
+        role: 'Lead Code Chronicler & Docs',
+        avatar: '📜',
+        color: '#f59e0b',
+        shirtColor: '#f59e0b',
+        pantsColor: '#1e293b',
+        hairColor: '#fef08a',
+        desk: DESK_SLOTS[5],
+        currentPos: getDeskSeat(DESK_SLOTS[5]),
+        targetPos: getDeskSeat(DESK_SLOTS[5]),
+        state: 'thinking',
+        status: 'idle',
+        isWorking: false,
+        thought: 'Codebase features chronicled in CHANGELOG.md. Standing by.',
+        tool: 'Idle',
+        currentAction: 'Standing by (Docs Synced)',
+        files: ['CHANGELOG.md', 'README.md', 'docs/admin-and-settings.md'],
+        toolCount: 68,
+        isPrimary: false,
+      },
+      {
+        id: 'a71b80f92ec84aa91',
+        name: 'Hunter',
+        role: 'Security & Penetration Auditor (SOC)',
+        avatar: '🥷',
+        color: '#10b981',
+        shirtColor: '#0f172a',
+        pantsColor: '#020617',
+        hairColor: '#34d399',
+        desk: DESK_SLOTS[6],
+        currentPos: getDeskSeat(DESK_SLOTS[6]),
+        targetPos: getDeskSeat(DESK_SLOTS[6]),
+        state: 'thinking',
+        status: 'idle',
+        isWorking: false,
+        thought: 'Perimeter secure. All 31 security & IDOR tests passing. Standing by.',
+        tool: 'Idle',
+        currentAction: 'Standing by (Perimeter Secure)',
+        files: ['test_security_audit.py', 'auth.py', 'tenants.py'],
+        toolCount: 19,
+        isPrimary: false,
+      }
+    ];
+
+    let agents = [claudeOrchestrator, ...INITIAL_SUBAGENTS];
+    let selectedAgent = claudeOrchestrator;
+    let hoveredAgent = null;
+    let bubbleMode = 'smart'; // 'smart' (default) | 'activeOnly' | 'all'
+    let agentOverlayQueue = [];
+    let isLiveMode = true;
+    let simSpeed = 1;
+    let isPaused = false;
+    let isNightMode = true;
+    let isCRTMode = false;
+    let isExpanded = false;
+    let particles = [];
+    let globalTick = 0;
+
+    // Viewport & Pan/Zoom State
+    let zoom = 1.0;
+    let panX = 0;
+    let panY = 0;
+    let isDragging = false;
+    let startDragX = 0;
+    let startDragY = 0;
+
+    const canvas = document.getElementById('officeCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const h = isExpanded ? Math.max(900, window.innerHeight * 0.88) : 820;
+      canvas.width = rect.width * dpr;
+      canvas.height = h * dpr;
+      canvas.style.height = `${h}px`;
+      ctx.scale(dpr, dpr);
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function isoToScreen(gx, gy, gz = 0) {
+      const originX = canvas.getBoundingClientRect().width / 2;
+      const originY = 50;
+      const sx = originX + (gx - gy) * (TILE_W / 2) * zoom + panX;
+      const sy = originY + (gx + gy) * (TILE_H / 2) * zoom + panY - gz * zoom;
+      return { x: sx, y: sy };
+    }
+
+    // --- 2. Upgraded Isometric Rendering Primitives & Textures ---
+    function drawIsometricTile(gx, gy, fillStyle, strokeStyle = '#33415525', tileType = 'plain') {
+      const p = isoToScreen(gx, gy);
+      const tw = TILE_W * zoom;
+      const th = TILE_H * zoom;
+
+      // Base diamond tile
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+      ctx.lineTo(p.x + tw / 2, p.y + th / 2);
+      ctx.lineTo(p.x, p.y + th);
+      ctx.lineTo(p.x - tw / 2, p.y + th / 2);
+      ctx.closePath();
+      ctx.fillStyle = fillStyle;
+      ctx.fill();
+
+      // Top-edge 3D bevel highlight for physical surface relief
+      ctx.beginPath();
+      ctx.moveTo(p.x - tw / 2, p.y + th / 2);
+      ctx.lineTo(p.x, p.y);
+      ctx.lineTo(p.x + tw / 2, p.y + th / 2);
+      ctx.strokeStyle = isNightMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.28)';
+      ctx.lineWidth = 1 * zoom;
+      ctx.stroke();
+
+      // Departmental Procedural Textures
+      if (tileType === 'wood') {
+        // Alternating Parquet Wood Grain Planks
+        ctx.strokeStyle = isNightMode ? 'rgba(0, 0, 0, 0.25)' : 'rgba(0, 0, 0, 0.09)';
+        ctx.lineWidth = 0.8 * zoom;
+        ctx.beginPath();
+        if ((gx + gy) % 2 === 0) {
+          ctx.moveTo(p.x - tw * 0.22, p.y + th * 0.28);
+          ctx.lineTo(p.x + tw * 0.22, p.y + th * 0.72);
+        } else {
+          ctx.moveTo(p.x + tw * 0.22, p.y + th * 0.28);
+          ctx.lineTo(p.x - tw * 0.22, p.y + th * 0.72);
+        }
+        ctx.stroke();
+      } else if (tileType === 'matrix') {
+        // Cyber SOC Emerald Grid & Pulse Nodes
+        ctx.fillStyle = '#10b98125';
+        ctx.fillRect(p.x - 2 * zoom, p.y + th / 2 - 2 * zoom, 4 * zoom, 4 * zoom);
+        if ((gx * 3 + gy * 7 + Math.floor(globalTick * 0.05)) % 6 === 0) {
+          ctx.fillStyle = '#34d39970';
+          ctx.beginPath();
+          ctx.arc(p.x, p.y + th / 2, 2.5 * zoom, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      } else if (tileType === 'grate') {
+        // Telecom Raised Server Grate Ventilation
+        ctx.fillStyle = isNightMode ? '#00f5d415' : '#0284c718';
+        for (let row = -1; row <= 1; row++) {
+          for (let col = -1; col <= 1; col++) {
+            ctx.fillRect(p.x + col * 8 * zoom - 1 * zoom, p.y + th / 2 + row * 4 * zoom - 1 * zoom, 2 * zoom, 2 * zoom);
+          }
+        }
+      } else if (tileType === 'terrazzo') {
+        // UI Studio Creative Terrazzo Specks
+        const colors = ['#f43f5e30', '#a855f730', '#38bdf830', '#fde04730'];
+        for (let i = 0; i < 3; i++) {
+          ctx.fillStyle = colors[(gx * 3 + gy * 7 + i) % colors.length];
+          ctx.fillRect(p.x + ((i - 1) * 9) * zoom, p.y + th / 2 + ((i % 2) * 4 - 2) * zoom, 2 * zoom, 2 * zoom);
+        }
+      }
+
+      if (strokeStyle) {
+        ctx.strokeStyle = strokeStyle;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+    }
+
+    function drawIsometricBox(gx, gy, bw, bl, bh, topColor, leftColor, rightColor) {
+      const p = isoToScreen(gx, gy);
+      const hw = (bw * (TILE_W / 2)) * zoom;
+      const hl = (bl * (TILE_H / 2)) * zoom;
+      bh = bh * zoom;
+
+      // Soft drop shadow beneath 3D box
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+      ctx.beginPath();
+      ctx.ellipse(p.x, p.y + hl / 2 + 2 * zoom, hw * 1.1, hl * 0.7, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Left face (shaded darker for directional lighting)
+      ctx.beginPath();
+      ctx.moveTo(p.x - hw, p.y + hl / 2 - bh);
+      ctx.lineTo(p.x, p.y + hl - bh);
+      ctx.lineTo(p.x, p.y + hl);
+      ctx.lineTo(p.x - hw, p.y + hl / 2);
+      ctx.closePath();
+      ctx.fillStyle = leftColor;
+      ctx.fill();
+
+      // Right face (mid tone)
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y + hl - bh);
+      ctx.lineTo(p.x + hw, p.y + hl / 2 - bh);
+      ctx.lineTo(p.x + hw, p.y + hl / 2);
+      ctx.lineTo(p.x, p.y + hl);
+      ctx.closePath();
+      ctx.fillStyle = rightColor;
+      ctx.fill();
+
+      // Top face (brightest)
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y - bh);
+      ctx.lineTo(p.x + hw, p.y + hl / 2 - bh);
+      ctx.lineTo(p.x, p.y + hl - bh);
+      ctx.lineTo(p.x - hw, p.y + hl / 2 - bh);
+      ctx.closePath();
+      ctx.fillStyle = topColor;
+      ctx.fill();
+
+      // Top edge highlight line
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.lineWidth = 1 * zoom;
+      ctx.beginPath();
+      ctx.moveTo(p.x - hw, p.y + hl / 2 - bh);
+      ctx.lineTo(p.x, p.y - bh);
+      ctx.lineTo(p.x + hw, p.y + hl / 2 - bh);
+      ctx.stroke();
+    }
+
+    // --- 3. Multi-Zone Floor Plan, Panoramic Skyline Windows & Architectural Walls ---
+    function renderOfficeFloor() {
+      // 1. Procedural Flooring by Departmental Zone
+      for (let x = 0; x < GRID_W; x++) {
+        for (let y = 0; y < GRID_H; y++) {
+          let tileColor;
+          let tileType = 'plain';
+
+          // 1. Café & Lounge (x: 1..6, y: 1..6) - Bistro Checkerboard
+          if (x >= 1 && x <= 6 && y >= 1 && y <= 6) {
+            tileColor = (x + y) % 2 === 0 ? (isNightMode ? '#1e293b' : '#f8fafc') : (isNightMode ? '#0f172a' : '#e2e8f0');
+            tileType = 'bistro';
+          }
+          // 2. Executive Suite (Claude) (x: 7..14, y: 1..6) - Polished Mahogany Parquet
+          else if (x >= 7 && x <= 14 && y >= 1 && y <= 6) {
+            tileColor = (x + y) % 2 === 0 ? (isNightMode ? '#3d1602' : '#a14707') : (isNightMode ? '#5e2307' : '#853509');
+            tileType = 'wood';
+          }
+          // 3. Dedicated Data Vault / Server Room (x: 15..23, y: 1..6) - Raised Server Grates
+          else if (x >= 15 && x <= 23 && y >= 1 && y <= 6) {
+            tileColor = (x + y) % 2 === 0 ? '#0a1022' : '#111b36';
+            tileType = 'grate';
+          }
+          // 4. UI Design Studio (Ava) (x: 1..6, y: 7..13) - Creative Violet Terrazzo
+          else if (x >= 1 && x <= 6 && y >= 7 && y <= 13) {
+            tileColor = (x + y) % 2 === 0 ? (isNightMode ? '#280c54' : '#fae8ff') : (isNightMode ? '#35085c' : '#f5d0fe');
+            tileType = 'terrazzo';
+          }
+          // 5. Engineering Bullpen (Felix & Archie) (x: 7..15, y: 7..13) - Natural Oak Parquet
+          else if (x >= 7 && x <= 15 && y >= 7 && y <= 13) {
+            tileColor = (x + y) % 2 === 0 ? (isNightMode ? '#1e1b18' : '#d7c4b7') : (isNightMode ? '#2c2724' : '#cbb3a3');
+            tileType = 'wood';
+          }
+          // 6. QA & Telecom Lab (Victor & Tally) (x: 16..23, y: 7..13) - Neon Cyan Lab Grid
+          else if (x >= 16 && x <= 23 && y >= 7 && y <= 13) {
+            tileColor = (x + y) % 2 === 0 ? (isNightMode ? '#083344' : '#cffafe') : (isNightMode ? '#0e4a5e' : '#a5f3fc');
+            tileType = 'plain';
+          }
+          // 7. Cyber SOC Lab (Hunter) (x: 1..8, y: 14..19) - Obsidian Matrix Grid
+          else if (x >= 1 && x <= 8 && y >= 14 && y <= 19) {
+            tileColor = (x + y) % 2 === 0 ? (isNightMode ? '#02241b' : '#d1fae5') : (isNightMode ? '#043b2c' : '#a7f3d0');
+            tileType = 'matrix';
+          }
+          // 8. Executive War Room Amphitheater (x: 9..23, y: 14..19) - Deep Acoustic Navy
+          else if (x >= 9 && x <= 23 && y >= 14 && y <= 19) {
+            tileColor = (x + y) % 2 === 0 ? (isNightMode ? '#0f172a' : '#ede9fe') : (isNightMode ? '#1b1747' : '#ddd6fe');
+            tileType = 'plain';
+          }
+          // Perimeter & Hallway Walkways
+          else {
+            tileColor = isNightMode ? '#090d16' : '#cbd5e1';
+          }
+
+          drawIsometricTile(x, y, tileColor, isNightMode ? '#ffffff0a' : '#0000000e', tileType);
+        }
+      }
+
+      // High-Contrast Typographic Floor Zone Decals
+      const floorDecals = [
+        { label: '// CAFÉ & LOUNGE', x: 2.2, y: 5.8, color: '#f59e0b' },
+        { label: '// EXECUTIVE SUITE', x: 9.5, y: 5.8, color: '#f59e0b' },
+        { label: '// DATA VAULT CORE', x: 18.0, y: 5.6, color: '#06b6d4' },
+        { label: '// UI/UX DESIGN LAB', x: 2.5, y: 12.8, color: '#f43f5e' },
+        { label: '// ENGINEERING BULLPEN', x: 10.5, y: 12.8, color: '#3b82f6' },
+        { label: '// QA VERIFICATION LAB', x: 19.0, y: 12.8, color: '#06b6d4' },
+        { label: '// CYBER SOC DEFENSE', x: 3.5, y: 18.8, color: '#10b981' },
+        { label: '// WAR ROOM AMPHITHEATER', x: 13.5, y: 14.0, color: '#8b5cf6' },
+      ];
+      floorDecals.forEach(d => {
+        const dp = isoToScreen(d.x, d.y, 0);
+        ctx.save();
+        ctx.font = `bold ${Math.max(9, 9.5 * zoom)}px "JetBrains Mono", monospace`;
+        ctx.fillStyle = isNightMode ? `${d.color}50` : `${d.color}90`;
+        ctx.fillText(d.label, dp.x - 30 * zoom, dp.y);
+        ctx.restore();
+      });
+
+      // 2. Exterior Walls & Panoramic City Skyline Windows
+      const wallH = 105 * zoom;
+      const tw = TILE_W * zoom;
+      const th = TILE_H * zoom;
+
+      // North-West Back Wall (x: 0..GRID_W at y = 0)
+      for (let x = 0; x < GRID_W; x++) {
+        const p = isoToScreen(x, 0);
+        const isWindow = (x >= 7 && x <= 23); // Panoramic window along Executive & Telecom
+
+        if (isWindow) {
+          // --- PANORAMIC SKYLINE WINDOW ---
+          // A. Distant Sky Gradient
+          const skyH = wallH * 1.35;
+          const skyGrad = ctx.createLinearGradient(0, p.y - skyH, 0, p.y);
+          if (isNightMode) {
+            skyGrad.addColorStop(0, '#020617');
+            skyGrad.addColorStop(0.6, '#081229');
+            skyGrad.addColorStop(1, '#0f172a');
+          } else {
+            skyGrad.addColorStop(0, '#7dd3fc');
+            skyGrad.addColorStop(0.7, '#e0f2fe');
+            skyGrad.addColorStop(1, '#ffedd5');
+          }
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(p.x + tw / 2, p.y + th / 2);
+          ctx.lineTo(p.x + tw / 2, p.y + th / 2 - wallH);
+          ctx.lineTo(p.x, p.y - wallH);
+          ctx.closePath();
+          ctx.fillStyle = skyGrad;
+          ctx.fill();
+
+          // B. Distant Skyscraper Silhouettes
+          const seed = (x * 17) % 7;
+          const towerH = (45 + seed * 8) * zoom;
+          const towerW = tw * 0.45;
+          const towerX = p.x + (x % 2 === 0 ? 4 : -8) * zoom;
+          const towerY = p.y + th / 4 - towerH;
+
+          ctx.fillStyle = isNightMode ? '#030712' : '#94a3b8';
+          ctx.fillRect(towerX, towerY, towerW, towerH);
+
+          // Skyscraper Lit Windows (Twinkling city lights)
+          if (isNightMode) {
+            const winColors = ['#fde047', '#38bdf8', '#f43f5e', '#a7f3d0'];
+            for (let r = 0; r < 5; r++) {
+              for (let c = 0; c < 3; c++) {
+                if ((x + r * 3 + c * 2) % 3 !== 0) {
+                  ctx.fillStyle = winColors[(x + r + c) % winColors.length];
+                  ctx.globalAlpha = 0.75;
+                  ctx.fillRect(towerX + 3 * zoom + c * 5 * zoom, towerY + 6 * zoom + r * 7 * zoom, 2.5 * zoom, 3 * zoom);
+                  ctx.globalAlpha = 1.0;
+                }
+              }
+            }
+            // Aircraft warning radio beacon on tower top
+            if (x === 8 || x === 14) {
+              const beaconPulse = Math.sin(globalTick * 0.1) > 0.6;
+              ctx.fillStyle = beaconPulse ? '#ef4444' : '#7f1d1d';
+              ctx.beginPath();
+              ctx.arc(towerX + towerW / 2, towerY - 6 * zoom, 2 * zoom, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+
+          // C. Glass Pane Specular Diagonal Reflections & Window Frame Mullions
+          ctx.strokeStyle = isNightMode ? '#1e293b' : '#cbd5e1';
+          ctx.lineWidth = 1.5 * zoom;
+          ctx.stroke();
+
+          // Mullion pillar between window bays
+          ctx.fillStyle = isNightMode ? '#0f172a' : '#64748b';
+          ctx.fillRect(p.x - 2 * zoom, p.y - wallH, 4 * zoom, wallH);
+
+          // Diagonal glass sheen lines
+          ctx.strokeStyle = isNightMode ? 'rgba(255, 255, 255, 0.06)' : 'rgba(255, 255, 255, 0.2)';
+          ctx.lineWidth = 2 * zoom;
+          ctx.beginPath();
+          ctx.moveTo(p.x - 10 * zoom, p.y - 30 * zoom);
+          ctx.lineTo(p.x + 20 * zoom, p.y - wallH + 10 * zoom);
+          ctx.stroke();
+
+          // Lower Window Sill
+          ctx.fillStyle = isNightMode ? '#1e293b' : '#e2e8f0';
+          ctx.fillRect(p.x, p.y + th / 4 - 4 * zoom, tw / 2, 4 * zoom);
+        } else {
+          // --- SOLID ARCHITECTURAL WALL (Café & Lounge) ---
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(p.x + tw / 2, p.y + th / 2);
+          ctx.lineTo(p.x + tw / 2, p.y + th / 2 - wallH);
+          ctx.lineTo(p.x, p.y - wallH);
+          ctx.closePath();
+          ctx.fillStyle = isNightMode ? ((x % 2 === 0) ? '#0f172a' : '#1e293b') : ((x % 2 === 0) ? '#94a3b8' : '#cbd5e1');
+          ctx.fill();
+          ctx.strokeStyle = isNightMode ? '#1e293b' : '#cbd5e1';
+          ctx.stroke();
+
+          // Wooden Baseboard Molding
+          ctx.fillStyle = isNightMode ? '#451a03' : '#78350f';
+          ctx.fillRect(p.x, p.y + th / 4 - 5 * zoom, tw / 2, 5 * zoom);
+
+          // Wall Sconce Light with Downward Radial Cone
+          if (x === 2 || x === 4) {
+            ctx.fillStyle = '#fde047';
+            ctx.fillRect(p.x + tw / 4 - 3 * zoom, p.y - wallH + 30 * zoom, 6 * zoom, 4 * zoom);
+            const lightGrad = ctx.createRadialGradient(p.x + tw / 4, p.y - wallH + 32 * zoom, 2 * zoom, p.x + tw / 4, p.y - wallH + 55 * zoom, 32 * zoom);
+            lightGrad.addColorStop(0, 'rgba(253, 224, 71, 0.35)');
+            lightGrad.addColorStop(1, 'rgba(253, 224, 71, 0.0)');
+            ctx.fillStyle = lightGrad;
+            ctx.beginPath();
+            ctx.arc(p.x + tw / 4, p.y - wallH + 45 * zoom, 28 * zoom, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      }
+
+      // West Back Wall (x = 0 along y = 0..GRID_H)
+      for (let y = 0; y < GRID_H; y++) {
+        const p = isoToScreen(0, y);
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(p.x - tw / 2, p.y + th / 2);
+        ctx.lineTo(p.x - tw / 2, p.y + th / 2 - wallH);
+        ctx.lineTo(p.x, p.y - wallH);
+        ctx.closePath();
+        ctx.fillStyle = isNightMode ? ((y % 2 === 0) ? '#090d16' : '#0f172a') : ((y % 2 === 0) ? '#64748b' : '#94a3b8');
+        ctx.fill();
+        ctx.strokeStyle = isNightMode ? '#1e293b' : '#cbd5e1';
+        ctx.stroke();
+
+        // Baseboard
+        ctx.fillStyle = isNightMode ? '#1e293b' : '#475569';
+        ctx.fillRect(p.x - tw / 2, p.y + th / 4 - 5 * zoom, tw / 2, 5 * zoom);
+
+        // Wall sconces along East Wall
+        if (y === 3 || y === 8 || y === 13) {
+          ctx.fillStyle = '#38bdf8';
+          ctx.fillRect(p.x - tw / 4 - 3 * zoom, p.y - wallH + 30 * zoom, 6 * zoom, 4 * zoom);
+          const lightGrad = ctx.createRadialGradient(p.x - tw / 4, p.y - wallH + 32 * zoom, 2 * zoom, p.x - tw / 4, p.y - wallH + 55 * zoom, 30 * zoom);
+          lightGrad.addColorStop(0, 'rgba(56, 189, 248, 0.3)');
+          lightGrad.addColorStop(1, 'rgba(56, 189, 248, 0.0)');
+          ctx.fillStyle = lightGrad;
+          ctx.beginPath();
+          ctx.arc(p.x - tw / 4, p.y - wallH + 45 * zoom, 28 * zoom, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      // 3. Departmental Wall Neon Signage Badges & Wayfinding Directory Totems
+      const signConfigs = [
+        { label: 'EXECUTIVE // CLAUDE', x: 10.5, y: 0, color: '#f59e0b' },
+        { label: 'DATA VAULT // SERVER CORE', x: 19.0, y: 0, color: '#06b6d4' },
+        { label: 'UI/UX STUDIO // AVA', x: 0, y: 10.0, color: '#f43f5e' },
+        { label: 'CYBER SOC // HUNTER', x: 0, y: 16.5, color: '#10b981' },
+        { label: 'WAR ROOM // BOARDROOM', x: 9.5, y: 14.5, color: '#8b5cf6', isTotem: true }
+      ];
+
+      signConfigs.forEach(sign => {
+        const sp = isoToScreen(sign.x, sign.y);
+        ctx.save();
+        ctx.font = `bold ${Math.max(7.5, 8 * zoom)}px "JetBrains Mono", monospace`;
+        const textW = ctx.measureText(sign.label).width;
+        const signW = textW + 12 * zoom;
+        const signH = 14 * zoom;
+
+        let signX = sp.x - signW / 2;
+        let signY;
+
+        if (sign.isTotem) {
+          // Freestanding corporate directory totem pedestal at entrance to War Room
+          drawIsometricBox(sign.x, sign.y, 0.45, 0.45, 26, isNightMode ? '#1e293b' : '#cbd5e1', '#0f172a', '#020617');
+          signY = sp.y - 38 * zoom;
+        } else {
+          signY = sp.y - wallH + 18 * zoom;
+        }
+
+        // Sign acrylic background plate
+        ctx.fillStyle = isNightMode ? 'rgba(15, 23, 42, 0.92)' : 'rgba(255, 255, 255, 0.92)';
+        ctx.beginPath();
+        ctx.roundRect(signX, signY, signW, signH, 3 * zoom);
+        ctx.fill();
+
+        // Neon border & glow
+        ctx.strokeStyle = sign.color;
+        ctx.lineWidth = 1.2 * zoom;
+        ctx.stroke();
+
+        ctx.fillStyle = sign.color;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(sign.label, signX + signW / 2, signY + signH / 2);
+        ctx.restore();
+      });
+
+      // 4. Whiteboard & Kanban Board
+      // Architecture Whiteboard in Executive Suite
+      const wbp = isoToScreen(POIS.whiteboard.x, POIS.whiteboard.y);
+      const wbW = 80 * zoom;
+      const wbH = 48 * zoom;
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(wbp.x - wbW / 2, wbp.y - 82 * zoom, wbW, wbH);
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 2 * zoom;
+      ctx.strokeRect(wbp.x - wbW / 2, wbp.y - 82 * zoom, wbW, wbH);
+
+      // Microservice Topology Diagram on Whiteboard
+      ctx.fillStyle = '#3b82f6';
+      ctx.fillRect(wbp.x - 32 * zoom, wbp.y - 74 * zoom, 22 * zoom, 12 * zoom);
+      ctx.fillStyle = '#10b981';
+      ctx.fillRect(wbp.x + 10 * zoom, wbp.y - 74 * zoom, 22 * zoom, 12 * zoom);
+      ctx.fillStyle = '#8b5cf6';
+      ctx.fillRect(wbp.x - 11 * zoom, wbp.y - 54 * zoom, 22 * zoom, 12 * zoom);
+
+      // Connecting flow lines
+      ctx.strokeStyle = '#64748b';
+      ctx.lineWidth = 1.5 * zoom;
+      ctx.beginPath();
+      ctx.moveTo(wbp.x - 10 * zoom, wbp.y - 68 * zoom);
+      ctx.lineTo(wbp.x + 10 * zoom, wbp.y - 68 * zoom);
+      ctx.moveTo(wbp.x, wbp.y - 68 * zoom);
+      ctx.lineTo(wbp.x, wbp.y - 54 * zoom);
+      ctx.stroke();
+
+      // Sprint Kanban Board on Bullpen Wall (x = 8.5, y = 6.0)
+      const kp = isoToScreen(POIS.kanban.x, POIS.kanban.y);
+      const kbW = 68 * zoom;
+      const kbH = 42 * zoom;
+      ctx.fillStyle = isNightMode ? '#1e293b' : '#f1f5f9';
+      ctx.fillRect(kp.x - kbW / 2, kp.y - 56 * zoom, kbW, kbH);
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 2 * zoom;
+      ctx.strokeRect(kp.x - kbW / 2, kp.y - 56 * zoom, kbW, kbH);
+
+      // Column divider lines
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1 * zoom;
+      ctx.beginPath();
+      for (let c = 1; c < 4; c++) {
+        const lx = kp.x - kbW / 2 + c * (kbW / 4);
+        ctx.moveTo(lx, kp.y - 56 * zoom);
+        ctx.lineTo(lx, kp.y - 56 * zoom + kbH);
+      }
+      ctx.stroke();
+
+      // Post-it Sticky Notes
+      const noteColors = ['#fde047', '#a7f3d0', '#fbcfe8', '#bfdbfe'];
+      for (let col = 0; col < 4; col++) {
+        for (let row = 0; row < 2; row++) {
+          if ((col + row) % 3 !== 1) {
+            const nx = kp.x - kbW / 2 + 3 * zoom + col * (kbW / 4);
+            const ny = kp.y - 48 * zoom + row * 14 * zoom;            ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+            ctx.fillRect(nx + 1 * zoom, ny + 1 * zoom, 11 * zoom, 9 * zoom);
+            ctx.fillStyle = noteColors[(col * 2 + row) % noteColors.length];
+            ctx.fillRect(nx, ny, 11 * zoom, 9 * zoom);
+          }
+        }
+      }
+
+      // 5. Architectural Interior Divider Walls (Pony Walls) with Brass Doorways
+      renderPonyWalls();
+
+      // 6. Dedicated Server Room Enclosure: Soundproof Left Wall & Smoked Glass Viewing Partition
+      renderServerRoomEnclosure();
+    }
+
+    // --- Server Room Structural Enclosure (Acoustic Wall & Smoked Glass Viewing Wall) ---
+    function renderServerRoomEnclosure() {
+      const wallH = 46 * zoom;
+
+      // A. Soundproof Left Partition Wall along x = 15.0 (y: 1.0 to 6.0)
+      for (let y = 1; y < 6; y++) {
+        const p1 = isoToScreen(15.0, y);
+        const p2 = isoToScreen(15.0, y + 1);
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.lineTo(p2.x, p2.y - wallH);
+        ctx.lineTo(p1.x, p1.y - wallH);
+        ctx.closePath();
+        ctx.fillStyle = isNightMode ? '#0f172a' : '#475569';
+        ctx.fill();
+        ctx.strokeStyle = isNightMode ? '#1e293b' : '#64748b';
+        ctx.lineWidth = 1 * zoom;
+        ctx.stroke();
+
+        // Top titanium capping
+        ctx.strokeStyle = '#06b6d4';
+        ctx.lineWidth = 1.2 * zoom;
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y - wallH);
+        ctx.lineTo(p2.x, p2.y - wallH);
+        ctx.stroke();
+
+        // Yellow warning placard on partition wall
+        if (y === 3) {
+          const midX = (p1.x + p2.x) / 2;
+          const midY = (p1.y + p2.y) / 2 - wallH + 18 * zoom;
+          ctx.fillStyle = '#facc15';
+          ctx.fillRect(midX - 10 * zoom, midY - 6 * zoom, 20 * zoom, 12 * zoom);
+          ctx.fillStyle = '#020617';
+          ctx.font = `bold ${Math.max(5, 5 * zoom)}px monospace`;
+          ctx.textAlign = 'center';
+          ctx.fillText('HALON', midX, midY - 1 * zoom);
+          ctx.fillText('PROTECT', midX, midY + 4 * zoom);
+        }
+      }
+
+      // B. Smoked Acoustic Glass Viewing Wall along y = 6.0 (x: 15.0 to 23.0)
+      for (let x = 15; x < 23; x++) {
+        const p1 = isoToScreen(x, 6.0);
+        const p2 = isoToScreen(x + 1, 6.0);
+        const isDoor = (x === 15);
+
+        if (isDoor) {
+          // --- AIR-TIGHT SLIDING SERVER DOOR ---
+          // Diagonal hazard safety threshold on floor
+          const threshY = p1.y;
+          ctx.fillStyle = '#eab308';
+          ctx.fillRect(p1.x - 2 * zoom, threshY - 2 * zoom, 16 * zoom, 4 * zoom);
+          ctx.fillStyle = '#0f172a';
+          for (let s = 0; s < 4; s++) {
+            ctx.fillRect(p1.x + s * 4 * zoom, threshY - 2 * zoom, 2 * zoom, 4 * zoom);
+          }
+
+          // Door Frame
+          ctx.beginPath();
+          ctx.moveTo(p1.x, p1.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.lineTo(p2.x, p2.y - wallH);
+          ctx.lineTo(p1.x, p1.y - wallH);
+          ctx.closePath();
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.65)';
+          ctx.fill();
+          ctx.strokeStyle = '#06b6d4';
+          ctx.lineWidth = 1.8 * zoom;
+          ctx.stroke();
+
+          // Biometric Keypad & RFID Card Reader
+          ctx.fillStyle = '#020617';
+          ctx.fillRect(p2.x - 3 * zoom, p2.y - wallH / 2 - 6 * zoom, 4 * zoom, 9 * zoom);
+          // Glowing Authorized Green LED
+          ctx.fillStyle = '#10b981';
+          ctx.beginPath();
+          ctx.arc(p2.x - 1 * zoom, p2.y - wallH / 2 - 3 * zoom, 1.2 * zoom, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Door Plaque
+          ctx.fillStyle = '#06b6d4';
+          ctx.font = `bold ${Math.max(5, 5 * zoom)}px monospace`;
+          ctx.textAlign = 'center';
+          ctx.fillText('RESTRICTED', (p1.x + p2.x) / 2, (p1.y + p2.y) / 2 - wallH / 2);
+        } else {
+          // --- SMOKED TEMPERED GLASS VIEWING BAY ---
+          ctx.beginPath();
+          ctx.moveTo(p1.x, p1.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.lineTo(p2.x, p2.y - wallH);
+          ctx.lineTo(p1.x, p1.y - wallH);
+          ctx.closePath();
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.40)'; // Smoked translucent glass to see server racks inside
+          ctx.fill();
+          ctx.strokeStyle = '#38bdf840';
+          ctx.lineWidth = 1 * zoom;
+          ctx.stroke();
+
+          // Diagonal Glass Specular Sheen Reflection
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+          ctx.lineWidth = 1.5 * zoom;
+          ctx.beginPath();
+          ctx.moveTo(p1.x + 3 * zoom, p1.y - 8 * zoom);
+          ctx.lineTo(p2.x - 3 * zoom, p2.y - wallH + 10 * zoom);
+          ctx.stroke();
+
+          // Vertical Aluminum Mullion Pillar
+          ctx.fillStyle = '#334155';
+          ctx.fillRect(p2.x - 1.2 * zoom, p2.y - wallH, 2.4 * zoom, wallH);
+        }
+
+        // Top Aluminum Header Rail with Neon Cyan LED Runner
+        ctx.strokeStyle = '#06b6d4';
+        ctx.lineWidth = 1.5 * zoom;
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y - wallH);
+        ctx.lineTo(p2.x, p2.y - wallH);
+        ctx.stroke();
+      }
+    }
+
+    // --- 4. Architectural Departmental Dividers: Low Planter Credenzas & Brass Floor Inlays ---
+    function drawPlanterDivider(x1, y1, x2, y2) {
+      const lenX = Math.abs(x2 - x1);
+      const lenY = Math.abs(y2 - y1);
+      const isX = lenX >= lenY;
+      const startX = Math.min(x1, x2);
+      const startY = Math.min(y1, y2);
+      const bw = isX ? lenX : 0.28;
+      const bl = isX ? 0.28 : lenY;
+      const planterH = 6; // Low profile 6px so camera lines stay pristine
+
+      // Subtle floor AO
+      const p = isoToScreen(startX + bw / 2, startY + bl / 2, 0);
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+      ctx.beginPath();
+      ctx.ellipse(p.x, p.y + 4 * zoom, (bw + bl) * 12 * zoom, 6 * zoom, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Modern Matte Charcoal Planter Trough
+      drawIsometricBox(startX, startY, bw, bl, planterH, isNightMode ? '#1e293b' : '#475569', '#0f172a', '#020617');
+
+      // Top Soil Bed (Dark Rich Compost)
+      const sp = isoToScreen(startX, startY, planterH);
+      ctx.fillStyle = '#1c1917';
+      const count = isX ? Math.floor(lenX * 2.5) : Math.floor(lenY * 2.5);
+
+      // Architectural Snake Plants & Lush Boston Fern Sprigs along the planter
+      const plantColors = ['#10b981', '#059669', '#047857', '#34d399'];
+      for (let i = 0; i < count; i++) {
+        const t = (i + 0.5) / count;
+        const px = isX ? startX + t * lenX : startX + 0.14;
+        const py = isX ? startY + 0.14 : startY + t * lenY;
+        const leafP = isoToScreen(px, py, planterH);
+
+        // Snake plant upright leaves
+        const hLeaf = (7 + ((i * 3) % 5)) * zoom;
+        ctx.fillStyle = plantColors[i % plantColors.length];
+        ctx.beginPath();
+        ctx.moveTo(leafP.x - 2 * zoom, leafP.y);
+        ctx.lineTo(leafP.x, leafP.y - hLeaf);
+        ctx.lineTo(leafP.x + 2 * zoom, leafP.y);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+
+    function drawFloorDoorwayThreshold(x, y) {
+      const p = isoToScreen(x, y, 0);
+      // Polished brass transition threshold strip
+      ctx.fillStyle = '#b45309';
+      ctx.fillRect(p.x - 8 * zoom, p.y - 2 * zoom, 16 * zoom, 4 * zoom);
+      ctx.fillStyle = '#f59e0b'; // Specular highlight
+      ctx.fillRect(p.x - 7 * zoom, p.y - 2 * zoom, 14 * zoom, 1 * zoom);
+    }
+
+    function renderPonyWalls() {
+      // 1. Café & UI Studio (y = 6.5, x: 1..6): Planters with Center Doorway
+      drawPlanterDivider(1.0, 6.5, 2.8, 6.5);
+      drawFloorDoorwayThreshold(3.5, 6.5);
+      drawPlanterDivider(4.2, 6.5, 6.0, 6.5);
+
+      // 2. Executive Suite & Bullpen (y = 6.5, x: 7..14): Planters with Center Doorway
+      drawPlanterDivider(7.0, 6.5, 9.8, 6.5);
+      drawFloorDoorwayThreshold(10.5, 6.5);
+      drawPlanterDivider(11.2, 6.5, 14.5, 6.5);
+
+      // 3. UI Studio & Cyber SOC (y = 13.5, x: 1..8): Planters with Center Doorway
+      drawPlanterDivider(1.0, 13.5, 3.8, 13.5);
+      drawFloorDoorwayThreshold(4.5, 13.5);
+      drawPlanterDivider(5.2, 13.5, 8.5, 13.5);
+
+      // 4. Bullpen / QA & War Room (y = 13.5, x: 9..23): Wide Planters with Double Doorway
+      drawPlanterDivider(9.0, 13.5, 14.0, 13.5);
+      drawFloorDoorwayThreshold(15.5, 13.5);
+      drawPlanterDivider(17.0, 13.5, 23.0, 13.5);
+    }
+
+    // --- 5. Ergonomic 3D Mesh Task Chair Component ---
+    function drawErgonomicMeshChair(gx, gy, facingDir = 'desk', isExecutive = false) {
+      const p = isoToScreen(gx, gy, 0);
+      const chairColor = isNightMode ? '#1e293b' : '#334155';
+      const frameColor = isNightMode ? '#475569' : '#64748b';
+      const chromeColor = isNightMode ? '#94a3b8' : '#cbd5e1';
+
+      // A. Ambient occlusion floor contact shadow beneath chair
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.28)';
+      ctx.beginPath();
+      ctx.ellipse(p.x, p.y + 6 * zoom, 9 * zoom, 5 * zoom, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // B. 5-Star Chrome Caster Base & Dual-Wheel Casters
+      ctx.strokeStyle = chromeColor;
+      ctx.lineWidth = 1.6 * zoom;
+      for (let a = 0; a < 5; a++) {
+        const ang = a * (Math.PI * 2 / 5) + 0.3;
+        const legX = p.x + Math.cos(ang) * 7.5 * zoom;
+        const legY = p.y + 5 * zoom + Math.sin(ang) * 4 * zoom;
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y + 5 * zoom);
+        ctx.lineTo(legX, legY);
+        ctx.stroke();
+
+        // Dual-wheel casters at tip
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.arc(legX, legY + 0.5 * zoom, 1.4 * zoom, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // C. Pneumatic Gas-Lift Hydraulic Cylinder & Tilt Mechanism
+      ctx.fillStyle = chromeColor;
+      ctx.fillRect(p.x - 1.2 * zoom, p.y + 1 * zoom, 2.4 * zoom, 4.2 * zoom);
+      ctx.fillStyle = '#0f172a'; // Under-seat tilt mechanism housing
+      ctx.fillRect(p.x - 3.5 * zoom, p.y - 0.5 * zoom, 7 * zoom, 2.2 * zoom);
+
+      // D. Ergonomic Waterfall Contoured Seat Pan
+      ctx.fillStyle = chairColor;
+      ctx.beginPath();
+      ctx.ellipse(p.x, p.y - 1.5 * zoom, 8 * zoom, 5 * zoom, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = frameColor;
+      ctx.lineWidth = 1 * zoom;
+      ctx.stroke();
+
+      // Breathable mesh seat texture
+      ctx.strokeStyle = isNightMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)';
+      ctx.lineWidth = 0.8 * zoom;
+      ctx.beginPath();
+      ctx.moveTo(p.x - 5 * zoom, p.y - 1.5 * zoom);
+      ctx.lineTo(p.x + 5 * zoom, p.y - 1.5 * zoom);
+      ctx.stroke();
+
+      // E. 3D Adjustable Armrests with PU Pads
+      ctx.strokeStyle = frameColor;
+      ctx.lineWidth = 1.4 * zoom;
+      // Left arm stanchion & pad
+      ctx.beginPath();
+      ctx.moveTo(p.x - 7 * zoom, p.y - 1.5 * zoom);
+      ctx.lineTo(p.x - 7 * zoom, p.y - 6.5 * zoom);
+      ctx.stroke();
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(p.x - 9 * zoom, p.y - 7.5 * zoom, 4 * zoom, 1.8 * zoom);
+
+      // Right arm stanchion & pad
+      ctx.beginPath();
+      ctx.moveTo(p.x + 7 * zoom, p.y - 1.5 * zoom);
+      ctx.lineTo(p.x + 7 * zoom, p.y - 6.5 * zoom);
+      ctx.stroke();
+      ctx.fillRect(p.x + 5 * zoom, p.y - 7.5 * zoom, 4 * zoom, 1.8 * zoom);
+
+      // F. High-Back Breathable Mesh Backrest with Aluminum Lumbar Spine
+      // Structural Spine Y-Frame
+      ctx.strokeStyle = chromeColor;
+      ctx.lineWidth = 1.8 * zoom;
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y - 1.5 * zoom);
+      ctx.lineTo(p.x, p.y - 15 * zoom);
+      ctx.stroke();
+
+      // Horizontal Lumbar Support Band
+      ctx.fillStyle = '#020617';
+      ctx.beginPath();
+      ctx.roundRect(p.x - 5 * zoom, p.y - 10 * zoom, 10 * zoom, 2.6 * zoom, 1 * zoom);
+      ctx.fill();
+
+      // Mesh Backrest Frame
+      ctx.fillStyle = isNightMode ? 'rgba(15, 23, 42, 0.85)' : 'rgba(100, 116, 139, 0.85)';
+      ctx.beginPath();
+      ctx.roundRect(p.x - 6.5 * zoom, p.y - 17 * zoom, 13 * zoom, 13 * zoom, 3 * zoom);
+      ctx.fill();
+      ctx.strokeStyle = frameColor;
+      ctx.lineWidth = 1.2 * zoom;
+      ctx.stroke();
+
+      // Mesh Weave Texture Lines
+      ctx.strokeStyle = isNightMode ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.12)';
+      ctx.lineWidth = 0.8 * zoom;
+      ctx.beginPath();
+      for (let my = -15; my <= -6; my += 3) {
+        ctx.moveTo(p.x - 4.5 * zoom, p.y + my * zoom);
+        ctx.lineTo(p.x + 4.5 * zoom, p.y + my * zoom);
+      }
+      ctx.stroke();
+
+      // G. Executive Neck Cradle & Headrest
+      if (isExecutive) {
+        ctx.strokeStyle = chromeColor;
+        ctx.lineWidth = 1.4 * zoom;
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y - 17 * zoom);
+        ctx.lineTo(p.x, p.y - 20.5 * zoom);
+        ctx.stroke();
+
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.roundRect(p.x - 4.5 * zoom, p.y - 23.5 * zoom, 9 * zoom, 3.8 * zoom, 1.8 * zoom);
+        ctx.fill();
+        ctx.strokeStyle = frameColor;
+        ctx.lineWidth = 0.8 * zoom;
+        ctx.stroke();
+      }
+    }
+
+    // --- 6. Room Fixtures, Environmental Props & Animated Life ---
+    function renderRoomFixtures() {
+      // 1. Dedicated Enclosed Server Room (Data Center Core // Cold Aisle Matrix)
+      // All enterprise server cabinets consolidated into this single secure vault:
+      const serverRacks = [
+        POIS.serverRack1,
+        POIS.serverRack2,
+        POIS.serverRack3,
+        POIS.serverRack4,
+        POIS.serverRack5
+      ];
+
+      serverRacks.forEach((rack, idx) => {
+        const p = isoToScreen(rack.x, rack.y, 0);
+
+        // Floor AO contact shadow
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.42)';
+        ctx.beginPath();
+        ctx.ellipse(p.x, p.y + 11 * zoom, 20 * zoom, 11 * zoom, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 42U Server Chassis Body
+        drawIsometricBox(rack.x, rack.y, 0.95, 0.95, 58, '#1e293b', '#0f172a', '#020617');
+
+        // Top Roof Ventilation Fan Grilles
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.arc(p.x - 5 * zoom, p.y - 60 * zoom, 2.5 * zoom, 0, Math.PI * 2);
+        ctx.arc(p.x + 5 * zoom, p.y - 60 * zoom, 2.5 * zoom, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Dark Smoked Perforated Glass/Mesh Door Panel
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.82)';
+        ctx.fillRect(p.x - 13 * zoom, p.y - 48 * zoom, 26 * zoom, 44 * zoom);
+        ctx.strokeStyle = '#06b6d460';
+        ctx.lineWidth = 1 * zoom;
+        ctx.strokeRect(p.x - 13 * zoom, p.y - 48 * zoom, 26 * zoom, 44 * zoom);
+
+        // Stacked 1U/2U/4U Enterprise Server Nodes
+        for (let u = 0; u < 6; u++) {
+          const uy = p.y - 45 * zoom + u * 6.8 * zoom;
+          ctx.fillStyle = '#1e293b';
+          ctx.fillRect(p.x - 11.5 * zoom, uy, 23 * zoom, 5.5 * zoom);
+
+          // Hard drive hot-swap caddies
+          ctx.fillStyle = '#0f172a';
+          ctx.fillRect(p.x - 10.5 * zoom, uy + 1 * zoom, 14 * zoom, 3.5 * zoom);
+
+          // LED Activity Matrix
+          const ledColors = ['#10b981', '#06b6d4', '#3b82f6', '#f59e0b'];
+          for (let l = 0; l < 3; l++) {
+            const isBlinking = ((u * 3 + l + Math.floor(globalTick * 0.18 + idx * 3)) % 5) !== 0;
+            ctx.fillStyle = isBlinking ? ledColors[(u + l + idx) % ledColors.length] : '#047857';
+            ctx.fillRect(p.x + 5 * zoom + l * 2.2 * zoom, uy + 2 * zoom, 1.7 * zoom, 1.7 * zoom);
+          }
+        }
+
+        // Overhead Yellow Wire Mesh Cable Tray Bridge Linking All Racks
+        ctx.strokeStyle = '#eab308';
+        ctx.lineWidth = 1.8 * zoom;
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y - 60 * zoom);
+        ctx.lineTo(p.x + 10 * zoom, p.y - 74 * zoom);
+        ctx.stroke();
+
+        // Fiber optic trunk cables along side
+        ctx.strokeStyle = idx % 2 === 0 ? '#06b6d4' : '#eab308';
+        ctx.lineWidth = 1.2 * zoom;
+        ctx.beginPath();
+        ctx.moveTo(p.x + 11 * zoom, p.y - 46 * zoom);
+        ctx.bezierCurveTo(p.x + 15 * zoom, p.y - 22 * zoom, p.x + 9 * zoom, p.y - 10 * zoom, p.x + 11 * zoom, p.y + 2 * zoom);
+        ctx.stroke();
+      });
+
+      // In-Row CRAC Precision Air Conditioning Chiller Unit (x: 13.6, y: 3.5)
+      const cpP = isoToScreen(POIS.serverCooler.x, POIS.serverCooler.y, 0);
+      drawIsometricBox(POIS.serverCooler.x, POIS.serverCooler.y, 0.9, 0.9, 56, '#0f172a', '#020617', '#020617');
+      // Chiller front intake grille
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(cpP.x - 12 * zoom, cpP.y - 48 * zoom, 24 * zoom, 44 * zoom);
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 1 * zoom;
+      ctx.strokeRect(cpP.x - 12 * zoom, cpP.y - 48 * zoom, 24 * zoom, 44 * zoom);
+      // Twin spinning air intake turbines
+      const fanSpin = globalTick * 0.25;
+      for (let f = 0; f < 2; f++) {
+        const fy = cpP.y - 38 * zoom + f * 18 * zoom;
+        ctx.fillStyle = '#020617';
+        ctx.beginPath();
+        ctx.arc(cpP.x, fy, 6.5 * zoom, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 1.2 * zoom;
+        ctx.beginPath();
+        ctx.moveTo(cpP.x + Math.cos(fanSpin) * 5 * zoom, fy + Math.sin(fanSpin) * 5 * zoom);
+        ctx.lineTo(cpP.x - Math.cos(fanSpin) * 5 * zoom, fy - Math.sin(fanSpin) * 5 * zoom);
+        ctx.moveTo(cpP.x + Math.cos(fanSpin + Math.PI/2) * 5 * zoom, fy + Math.sin(fanSpin + Math.PI/2) * 5 * zoom);
+        ctx.lineTo(cpP.x - Math.cos(fanSpin + Math.PI/2) * 5 * zoom, fy - Math.sin(fanSpin + Math.PI/2) * 5 * zoom);
+        ctx.stroke();
+      }
+      // Chiller temperature digital LCD
+      ctx.fillStyle = '#020617';
+      ctx.fillRect(cpP.x - 10 * zoom, cpP.y - 46 * zoom, 20 * zoom, 6 * zoom);
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = `bold ${Math.max(5.5, 6 * zoom)}px monospace`;
+      ctx.textAlign = 'center';
+      ctx.fillText('18.2°C CRAC', cpP.x, cpP.y - 41.5 * zoom);
+
+      // Clean-Agent Fire Suppression System (FM-200 / Novec Cylinder on North Wall)
+      const fireP = isoToScreen(17.2, 1.0, 0);
+      ctx.fillStyle = '#b91c1c'; // Pressurized red cylinder
+      ctx.fillRect(fireP.x - 4 * zoom, fireP.y - 46 * zoom, 8 * zoom, 26 * zoom);
+      ctx.fillStyle = '#991b1b';
+      ctx.fillRect(fireP.x - 3 * zoom, fireP.y - 48 * zoom, 6 * zoom, 3 * zoom); // Tank cap
+      ctx.fillStyle = '#f59e0b'; // Brass pressure manometer
+      ctx.beginPath();
+      ctx.arc(fireP.x, fireP.y - 42 * zoom, 2.2 * zoom, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Master Environmental NOC Telemetry Board in Server Room
+      const emp = isoToScreen(17.2, 2.5, 0);
+      ctx.fillStyle = '#020617';
+      ctx.fillRect(emp.x - 18 * zoom, emp.y - 58 * zoom, 36 * zoom, 16 * zoom);
+      ctx.strokeStyle = '#06b6d4';
+      ctx.lineWidth = 1 * zoom;
+      ctx.strokeRect(emp.x - 18 * zoom, emp.y - 58 * zoom, 36 * zoom, 16 * zoom);
+      ctx.fillStyle = '#22d3ee';
+      ctx.font = `bold ${Math.max(6, 6.5 * zoom)}px monospace`;
+      ctx.textAlign = 'center';
+      ctx.fillText('TEMP: 18.2°C | 40% RH', emp.x, emp.y - 50 * zoom);
+      ctx.fillText('PUE: 1.12 | 10G CORE', emp.x, emp.y - 44 * zoom);
+
+      // 2. Café & Lounge: Commercial La Marzocco Dual-Boiler Espresso Bar
+      const cp = isoToScreen(POIS.coffeeMachine.x, POIS.coffeeMachine.y, 0);
+      // Espresso counter base (Rich Walnut Bar with Marble Countertop)
+      drawIsometricBox(POIS.coffeeMachine.x, POIS.coffeeMachine.y, 1.6, 1.1, 25, isNightMode ? '#334155' : '#e2e8f0', '#451a03', '#292524');
+
+      // Espresso Machine Stainless Steel Body with Walnut Side Panels
+      ctx.fillStyle = '#e2e8f0'; // Mirror finish stainless steel
+      ctx.fillRect(cp.x - 14 * zoom, cp.y - 46 * zoom, 28 * zoom, 19 * zoom);
+      ctx.fillStyle = '#78350f'; // Walnut side accent panels
+      ctx.fillRect(cp.x - 15 * zoom, cp.y - 46 * zoom, 2.5 * zoom, 19 * zoom);
+      ctx.fillRect(cp.x + 12.5 * zoom, cp.y - 46 * zoom, 2.5 * zoom, 19 * zoom);
+
+      // Stainless Upper Cup Warmer Rail with Stacked Ceramic Demitasses
+      ctx.strokeStyle = '#94a3b8';
+      ctx.lineWidth = 1 * zoom;
+      ctx.strokeRect(cp.x - 13 * zoom, cp.y - 51 * zoom, 26 * zoom, 5 * zoom);
+      for (let cup = 0; cup < 5; cup++) {
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillRect(cp.x - 11 * zoom + cup * 5 * zoom, cp.y - 50 * zoom, 3.8 * zoom, 3.5 * zoom);
+        ctx.fillStyle = '#d97706'; // Terracotta rim
+        ctx.fillRect(cp.x - 11 * zoom + cup * 5 * zoom, cp.y - 51 * zoom, 3.8 * zoom, 1 * zoom);
+      }
+
+      // Dual Exposed E61 Brass & Chrome Groupheads with Walnut Handles
+      for (let gh = 0; gh < 2; gh++) {
+        const gx = cp.x - 6 * zoom + gh * 12 * zoom;
+        ctx.fillStyle = '#cbd5e1'; // Chrome grouphead
+        ctx.fillRect(gx - 2.5 * zoom, cp.y - 37 * zoom, 5 * zoom, 4.5 * zoom);
+        // Portafilter with angled walnut lever
+        ctx.strokeStyle = '#78350f';
+        ctx.lineWidth = 1.8 * zoom;
+        ctx.beginPath();
+        ctx.moveTo(gx, cp.y - 33 * zoom);
+        ctx.lineTo(gx + 3.5 * zoom, cp.y - 28 * zoom);
+        ctx.stroke();
+        // Espresso shot cups on drip tray
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillRect(gx - 2 * zoom, cp.y - 28 * zoom, 4 * zoom, 3.5 * zoom);
+      }
+
+      // Dual Analog Brass Pressure Manometers
+      ctx.fillStyle = '#f59e0b';
+      ctx.beginPath();
+      ctx.arc(cp.x - 4 * zoom, cp.y - 41 * zoom, 2.8 * zoom, 0, Math.PI * 2);
+      ctx.arc(cp.x + 4 * zoom, cp.y - 41 * zoom, 2.8 * zoom, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath();
+      ctx.arc(cp.x - 4 * zoom, cp.y - 41 * zoom, 0.9 * zoom, 0, Math.PI * 2);
+      ctx.arc(cp.x + 4 * zoom, cp.y - 41 * zoom, 0.9 * zoom, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Mahlkönig Burr Coffee Grinder on the right side
+      ctx.fillStyle = '#0f172a'; // Grinder body
+      ctx.fillRect(cp.x + 15 * zoom, cp.y - 44 * zoom, 7 * zoom, 17 * zoom);
+      // Clear bean hopper with coffee beans
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.fillRect(cp.x + 15 * zoom, cp.y - 54 * zoom, 7 * zoom, 10 * zoom);
+      ctx.fillStyle = '#451a03'; // Roasted beans inside
+      ctx.fillRect(cp.x + 16 * zoom, cp.y - 52 * zoom, 5 * zoom, 7 * zoom);
+
+      // Barista Station: Glass Pastry Cloche with Butter Croissant
+      const clocheP = isoToScreen(POIS.coffeeMachine.x - 0.7, POIS.coffeeMachine.y + 0.1, 0);
+      ctx.fillStyle = '#cbd5e1'; // Marble base slab
+      ctx.fillRect(clocheP.x - 7 * zoom, clocheP.y - 27 * zoom, 14 * zoom, 2.5 * zoom);
+      // Golden Flaky Croissant
+      ctx.fillStyle = '#d97706';
+      ctx.beginPath();
+      ctx.ellipse(clocheP.x, clocheP.y - 29 * zoom, 4.5 * zoom, 2.5 * zoom, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Glass Cloche Dome
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+      ctx.beginPath();
+      ctx.arc(clocheP.x, clocheP.y - 30 * zoom, 6 * zoom, Math.PI, 0);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.75)';
+      ctx.lineWidth = 1 * zoom;
+      ctx.stroke();
+
+      // Water Cooler Dispenser with Bubbles
+      const wcp = isoToScreen(POIS.waterCooler.x, POIS.waterCooler.y, 0);
+      drawIsometricBox(POIS.waterCooler.x, POIS.waterCooler.y, 0.85, 0.85, 23, isNightMode ? '#1e293b' : '#cbd5e1', isNightMode ? '#0f172a' : '#94a3b8', '#020617');
+      ctx.fillStyle = '#38bdf8cc';
+      ctx.beginPath();
+      ctx.arc(wcp.x, wcp.y - 35 * zoom, 9 * zoom, 0, Math.PI * 2);
+      ctx.fill();
+      const bubbleY = wcp.y - 31 * zoom - (globalTick * 0.4) % (10 * zoom);
+      ctx.fillStyle = '#ffffffdd';
+      ctx.beginPath();
+      ctx.arc(wcp.x - 2 * zoom, bubbleY, 1.8 * zoom, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 3. Mid-Century Eames Lounge Chair & Ottoman in Reading Nook (x: 4.8, y: 4.8)
+      const eamesP = isoToScreen(4.8, 4.8, 0);
+      // Floor contact shadow
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.28)';
+      ctx.beginPath();
+      ctx.ellipse(eamesP.x, eamesP.y + 6 * zoom, 12 * zoom, 7 * zoom, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Aluminum 5-star base
+      ctx.strokeStyle = '#94a3b8';
+      ctx.lineWidth = 1.6 * zoom;
+      ctx.beginPath();
+      ctx.moveTo(eamesP.x - 7 * zoom, eamesP.y + 4 * zoom);
+      ctx.lineTo(eamesP.x + 7 * zoom, eamesP.y + 6 * zoom);
+      ctx.moveTo(eamesP.x, eamesP.y + 1 * zoom);
+      ctx.lineTo(eamesP.x, eamesP.y + 8 * zoom);
+      ctx.stroke();
+      // Molded Walnut Plywood Seat Shell
+      ctx.fillStyle = '#78350f';
+      ctx.beginPath();
+      ctx.ellipse(eamesP.x, eamesP.y - 1 * zoom, 9.5 * zoom, 6 * zoom, -0.2, 0, Math.PI * 2);
+      ctx.fill();
+      // Black Tufted Leather Cushion
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath();
+      ctx.ellipse(eamesP.x, eamesP.y - 2 * zoom, 8 * zoom, 4.8 * zoom, -0.2, 0, Math.PI * 2);
+      ctx.fill();
+      // Angled Walnut Back Shell & Head Cushion
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(eamesP.x - 6 * zoom, eamesP.y - 16 * zoom, 12 * zoom, 13 * zoom);
+      ctx.fillStyle = '#020617';
+      ctx.fillRect(eamesP.x - 5 * zoom, eamesP.y - 15 * zoom, 10 * zoom, 11 * zoom);
+      // Tufted button depressions
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(eamesP.x - 2 * zoom, eamesP.y - 12 * zoom, 1.5 * zoom, 1.5 * zoom);
+      ctx.fillRect(eamesP.x + 1 * zoom, eamesP.y - 12 * zoom, 1.5 * zoom, 1.5 * zoom);
+      ctx.fillRect(eamesP.x - 2 * zoom, eamesP.y - 8 * zoom, 1.5 * zoom, 1.5 * zoom);
+      ctx.fillRect(eamesP.x + 1 * zoom, eamesP.y - 8 * zoom, 1.5 * zoom, 1.5 * zoom);
+
+      // Eames Ottoman Footrest nearby (x: 4.0, y: 5.2)
+      const ottP = isoToScreen(4.0, 5.2, 0);
+      ctx.fillStyle = '#78350f'; // Walnut shell
+      ctx.fillRect(ottP.x - 6 * zoom, ottP.y - 6 * zoom, 12 * zoom, 5 * zoom);
+      ctx.fillStyle = '#0f172a'; // Leather cushion
+      ctx.fillRect(ottP.x - 5 * zoom, ottP.y - 8 * zoom, 10 * zoom, 4 * zoom);
+
+      // 4. Curved Tufted Teal Velvet Sectional Sofa with Brass Legs & Throw Blanket
+      drawIsometricBox(POIS.loungeSofa.x, POIS.loungeSofa.y, 2.2, 1.3, 19, '#0284c7', '#0369a1', '#075985');
+      const spP = isoToScreen(POIS.loungeSofa.x, POIS.loungeSofa.y, 0);
+      // Tapered Walnut Legs with Brass Ferrules
+      ctx.fillStyle = '#451a03';
+      ctx.fillRect(spP.x - 17 * zoom, spP.y + 7 * zoom, 2.5 * zoom, 6 * zoom);
+      ctx.fillRect(spP.x + 15 * zoom, spP.y + 7 * zoom, 2.5 * zoom, 6 * zoom);
+      ctx.fillStyle = '#f59e0b'; // Brass ferrules
+      ctx.fillRect(spP.x - 17 * zoom, spP.y + 11 * zoom, 2.5 * zoom, 2 * zoom);
+      ctx.fillRect(spP.x + 15 * zoom, spP.y + 11 * zoom, 2.5 * zoom, 2 * zoom);
+
+      // Button Tufting on Backrest
+      ctx.fillStyle = '#082f49';
+      for (let t = 0; t < 5; t++) {
+        ctx.fillRect(spP.x - 12 * zoom + t * 6 * zoom, spP.y - 12 * zoom, 2 * zoom, 2 * zoom);
+      }
+
+      // Mustard Accent Cushion & Folded Wool Throw Blanket
+      ctx.fillStyle = '#f59e0b';
+      ctx.fillRect(spP.x - 15 * zoom, spP.y - 20 * zoom, 7 * zoom, 7 * zoom);
+      // Plaid Wool Throw draped over arm
+      ctx.fillStyle = '#e2e8f0';
+      ctx.fillRect(spP.x + 8 * zoom, spP.y - 17 * zoom, 9 * zoom, 12 * zoom);
+      ctx.strokeStyle = '#0284c7';
+      ctx.lineWidth = 1 * zoom;
+      ctx.strokeRect(spP.x + 8 * zoom, spP.y - 17 * zoom, 9 * zoom, 12 * zoom);
+
+      // 5. Indoor Botanicals: Fiddle Leaf Fig & Monstera Deliciosa
+      // A. Potted Monstera Deliciosa in Ceramic Planter (x: 5.2, y: 1.5)
+      const plP1 = isoToScreen(5.2, 1.5, 0);
+      drawIsometricBox(5.2, 1.5, 0.75, 0.75, 15, isNightMode ? '#1e293b' : '#f1f5f9', isNightMode ? '#0f172a' : '#cbd5e1', '#020617');
+      const leafColors = ['#15803d', '#16a34a', '#22c55e', '#4ade80'];
+      for (let l = 0; l < 5; l++) {
+        const ang = (l * Math.PI * 2 / 5) + Math.sin(globalTick * 0.04 + l) * 0.12;
+        const lx = plP1.x + Math.cos(ang) * 11 * zoom;
+        const ly = plP1.y - 20 * zoom + Math.sin(ang) * 7 * zoom;
+        ctx.fillStyle = leafColors[l % leafColors.length];
+        ctx.beginPath();
+        ctx.ellipse(lx, ly, 7 * zoom, 4.5 * zoom, ang, 0, Math.PI * 2);
+        ctx.fill();
+        // Iconic monstera leaf fenestration slit
+        ctx.fillStyle = isNightMode ? '#020617' : '#ffffff';
+        ctx.fillRect(lx - 1 * zoom, ly - 1 * zoom, 2 * zoom, 2 * zoom);
+      }
+
+      // B. Fiddle Leaf Fig Tree in Fluted Terracotta Planter (x: 1.5, y: 10.5)
+      const flfP = isoToScreen(1.5, 10.5, 0);
+      drawIsometricBox(1.5, 10.5, 0.8, 0.8, 18, '#9a3412', '#7c2d12', '#431407');
+      // Wooden Trunk
+      ctx.strokeStyle = '#78350f';
+      ctx.lineWidth = 2.5 * zoom;
+      ctx.beginPath();
+      ctx.moveTo(flfP.x, flfP.y - 18 * zoom);
+      ctx.lineTo(flfP.x - 2 * zoom, flfP.y - 36 * zoom);
+      ctx.lineTo(flfP.x + 3 * zoom, flfP.y - 48 * zoom);
+      ctx.stroke();
+      // Broad violin-shaped leaves
+      for (let fl = 0; fl < 6; fl++) {
+        const fang = fl * 1.1 + Math.sin(globalTick * 0.03 + fl) * 0.08;
+        const fx = flfP.x + Math.cos(fang) * 10 * zoom;
+        const fy = flfP.y - 32 * zoom - fl * 3 * zoom + Math.sin(fang) * 5 * zoom;
+        ctx.fillStyle = ['#166534', '#15803d', '#14532d'][fl % 3];
+        ctx.beginPath();
+        ctx.ellipse(fx, fy, 8 * zoom, 5 * zoom, fang, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // 6. Ava's UI Style Easel in Studio
+      const ep = isoToScreen(POIS.avaEasel.x, POIS.avaEasel.y, 0);
+      ctx.strokeStyle = '#b45309';
+      ctx.lineWidth = 2.2 * zoom;
+      ctx.beginPath();
+      ctx.moveTo(ep.x, ep.y - 52 * zoom);
+      ctx.lineTo(ep.x - 16 * zoom, ep.y);
+      ctx.moveTo(ep.x, ep.y - 52 * zoom);
+      ctx.lineTo(ep.x + 16 * zoom, ep.y);
+      ctx.stroke();
+
+      // White Canvas Board with Responsive Wireframe & Palette
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(ep.x - 19 * zoom, ep.y - 50 * zoom, 38 * zoom, 28 * zoom);
+      ctx.strokeStyle = '#f43f5e';
+      ctx.lineWidth = 1.5 * zoom;
+      ctx.strokeRect(ep.x - 19 * zoom, ep.y - 50 * zoom, 38 * zoom, 28 * zoom);
+
+      // Sparkline
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 1.8 * zoom;
+      ctx.beginPath();
+      const sparkPoints = [12, 16, 14, 20, 15, 22, 18];
+      for (let s = 0; s < sparkPoints.length; s++) {
+        const sx = ep.x - 15 * zoom + s * 5 * zoom;
+        const sy = ep.y - 45 * zoom + sparkPoints[s] * 0.7 * zoom;
+        if (s === 0) ctx.moveTo(sx, sy);
+        else ctx.lineTo(sx, sy);
+      }
+      ctx.stroke();
+
+      // Color Swatch Pills
+      const easelSwatches = ['#f43f5e', '#a855f7', '#38bdf8', '#10b981'];
+      easelSwatches.forEach((c, sIdx) => {
+        ctx.fillStyle = c;
+        ctx.beginPath();
+        ctx.arc(ep.x - 12 * zoom + sIdx * 8 * zoom, ep.y - 27 * zoom, 2.5 * zoom, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // 7. Hunter's Threat Radar Terminal in Cyber SOC
+      const sdp = isoToScreen(POIS.socRadar.x, POIS.socRadar.y, 0);
+      drawIsometricBox(POIS.socRadar.x, POIS.socRadar.y, 1.05, 1.05, 38, '#064e3b', '#022c22', '#020617');
+      ctx.fillStyle = '#022c22';
+      ctx.fillRect(sdp.x - 15 * zoom, sdp.y - 54 * zoom, 30 * zoom, 20 * zoom);
+      ctx.strokeStyle = '#34d399';
+      ctx.lineWidth = 1.5 * zoom;
+      ctx.strokeRect(sdp.x - 15 * zoom, sdp.y - 54 * zoom, 30 * zoom, 20 * zoom);
+      const radarCenterX = sdp.x;
+      const radarCenterY = sdp.y - 44 * zoom;
+      ctx.strokeStyle = '#10b98160';
+      ctx.lineWidth = 1 * zoom;
+      ctx.beginPath();
+      ctx.arc(radarCenterX, radarCenterY, 4 * zoom, 0, Math.PI * 2);
+      ctx.arc(radarCenterX, radarCenterY, 8.5 * zoom, 0, Math.PI * 2);
+      ctx.stroke();
+      const sweepAngle = (globalTick * 0.08) % (Math.PI * 2);
+      ctx.strokeStyle = '#34d399';
+      ctx.lineWidth = 1.8 * zoom;
+      ctx.beginPath();
+      ctx.moveTo(radarCenterX, radarCenterY);
+      ctx.lineTo(radarCenterX + Math.cos(sweepAngle) * 8.5 * zoom, radarCenterY + Math.sin(sweepAngle) * 8.5 * zoom);
+      ctx.stroke();
+      if (Math.sin(globalTick * 0.15) > 0.4) {
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.arc(radarCenterX + 5 * zoom, radarCenterY - 4 * zoom, 1.8 * zoom, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // 8. War Room Racetrack Oval Conference Boardroom Table & Polycom
+      drawIsometricBox(POIS.confTable.x, POIS.confTable.y, 6.8, 2.2, 23, '#1e293b', '#0f172a', '#020617');
+      const ctp = isoToScreen(POIS.confTable.x, POIS.confTable.y, 0);
+
+      // Center Recessed Brushed Aluminum Tech Trough
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(ctp.x - 40 * zoom, ctp.y - 29 * zoom, 80 * zoom, 5 * zoom);
+      ctx.strokeStyle = '#64748b';
+      ctx.lineWidth = 1 * zoom;
+      ctx.strokeRect(ctp.x - 40 * zoom, ctp.y - 29 * zoom, 80 * zoom, 5 * zoom);
+
+      // Pop-up AC/AV connectivity port box
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(ctp.x - 18 * zoom, ctp.y - 28 * zoom, 8 * zoom, 3 * zoom);
+      ctx.fillRect(ctp.x + 10 * zoom, ctp.y - 28 * zoom, 8 * zoom, 3 * zoom);
+
+      // Polycom Triangular Conference Speakerphone in Center
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath();
+      ctx.moveTo(ctp.x, ctp.y - 33 * zoom);
+      ctx.lineTo(ctp.x - 5 * zoom, ctp.y - 26 * zoom);
+      ctx.lineTo(ctp.x + 5 * zoom, ctp.y - 26 * zoom);
+      ctx.closePath();
+      ctx.fill();
+      // Soft Glowing Call Status Ring
+      ctx.fillStyle = '#10b981';
+      ctx.beginPath();
+      ctx.arc(ctp.x, ctp.y - 28 * zoom, 1.5 * zoom, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Water Carafe & Crystal Glasses
+      ctx.fillStyle = 'rgba(56, 189, 248, 0.4)';
+      ctx.fillRect(ctp.x - 4 * zoom, ctp.y - 32 * zoom, 3 * zoom, 6 * zoom);
+      ctx.fillRect(ctp.x + 1 * zoom, ctp.y - 30 * zoom, 2 * zoom, 3 * zoom);
+
+      // 9. Executive Swivel Chairs for Boardroom & Overflow Stations
+      EXTRA_SEATS.forEach(seat => {
+        const isWarRoom = seat.zone === 'warRoom';
+        drawErgonomicMeshChair(seat.x, seat.y, 'table', isWarRoom);
+      });
+    }
+
+    // --- 7. High-Detail Designer Workstations & Dynamic Specialist Displays ---
+    function drawSingleDesk(desk, idx) {
+      const dp = isoToScreen(desk.x, desk.y, 0);
+      const isAva = desk.agentName === 'Ava' || desk.zone === 'uiStudio';
+      const isHunter = desk.agentName === 'Hunter' || desk.zone === 'socLab';
+      const isLead = desk.agentName === 'Claude' || desk.zone === 'executive';
+      const isTelecom = desk.agentName === 'Tally';
+      const isVictor = desk.agentName === 'Victor';
+      const isArchie = desk.agentName === 'Archie';
+      const isBullpen = desk.zone === 'bullpen';
+
+      // Desktop Finishes by Specialist
+      const deskTop = isAva 
+        ? (isNightMode ? '#3b2d4a' : '#f5ebe0') // Clean Nordic birch
+        : (isHunter 
+          ? '#091512' // High-tech matte carbon fiber
+          : (isLead 
+            ? '#3d1602' // Polished executive mahogany
+            : (isVictor 
+              ? '#0e4a5e' // Anti-static cyan/slate lab surface
+              : (isTelecom 
+                ? '#1e293b' // High-density rack workstation
+                : '#2c2724')))); // Natural European oak
+
+      const deskLeft = isAva ? (isNightMode ? '#281c34' : '#e2e8f0') : (isLead ? '#2b0f02' : '#1e293b');
+      const deskRight = isAva ? (isNightMode ? '#1e1427' : '#cbd5e1') : (isLead ? '#1f0b01' : '#0f172a');
+
+      // 1. Soft Ambient Occlusion Contact Shadow on Floor beneath Desk
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.32)';
+      ctx.beginPath();
+      ctx.ellipse(dp.x, dp.y + 14 * zoom, 28 * zoom, 13 * zoom, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 2. Hunter's Vibrant Emerald LED Underglow illumination on floor & legs
+      if (isHunter) {
+        const hunterGlow = ctx.createRadialGradient(dp.x, dp.y + 10 * zoom, 4 * zoom, dp.x, dp.y + 10 * zoom, 32 * zoom);
+        hunterGlow.addColorStop(0, 'rgba(16, 185, 129, 0.38)');
+        hunterGlow.addColorStop(0.6, 'rgba(5, 150, 105, 0.18)');
+        hunterGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = hunterGlow;
+        ctx.beginPath();
+        ctx.ellipse(dp.x, dp.y + 10 * zoom, 30 * zoom, 14 * zoom, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // 3. Matte Black Powder-Coated Steel Loop-Leg Frame (O-Frame)
+      ctx.fillStyle = '#0f172a';
+      // Left O-frame leg with inner cutout
+      ctx.fillRect(dp.x - 21 * zoom, dp.y - 3 * zoom, 3.5 * zoom, 16 * zoom);
+      ctx.fillRect(dp.x - 14 * zoom, dp.y + 2 * zoom, 3.5 * zoom, 14 * zoom);
+      ctx.fillRect(dp.x - 21 * zoom, dp.y + 11 * zoom, 9 * zoom, 2.5 * zoom);
+
+      // Right O-frame leg
+      ctx.fillRect(dp.x + 18 * zoom, dp.y - 3 * zoom, 3.5 * zoom, 16 * zoom);
+      ctx.fillRect(dp.x + 11 * zoom, dp.y + 2 * zoom, 3.5 * zoom, 14 * zoom);
+      ctx.fillRect(dp.x + 11 * zoom, dp.y + 11 * zoom, 9 * zoom, 2.5 * zoom);
+
+      // Chrome leveling glide feet
+      ctx.fillStyle = '#cbd5e1';
+      ctx.fillRect(dp.x - 22 * zoom, dp.y + 13 * zoom, 3 * zoom, 1.5 * zoom);
+      ctx.fillRect(dp.x - 13 * zoom, dp.y + 15 * zoom, 3 * zoom, 1.5 * zoom);
+      ctx.fillRect(dp.x + 10 * zoom, dp.y + 15 * zoom, 3 * zoom, 1.5 * zoom);
+      ctx.fillRect(dp.x + 19 * zoom, dp.y + 13 * zoom, 3 * zoom, 1.5 * zoom);
+
+      // 4. Under-Desk Modular 2-Drawer Pedestal Storage Cabinet (Right-hand side)
+      const pedTop = isAva ? (isNightMode ? '#281c34' : '#ede0d4') : '#1e293b';
+      const pedFace = isAva ? (isNightMode ? '#20162b' : '#e2e8f0') : '#0f172a';
+      drawIsometricBox(desk.x + 0.38, desk.y + 0.12, 0.45, 0.65, 14, pedTop, pedFace, '#020617');
+      const pp = isoToScreen(desk.x + 0.38, desk.y + 0.12, 0);
+
+      // Pedestal Drawer Seams & Brushed Chrome Pull Handles
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(pp.x + 2 * zoom, pp.y - 4 * zoom, 12 * zoom, 1 * zoom);
+      // Top Drawer Handle
+      ctx.fillStyle = '#e2e8f0';
+      ctx.fillRect(pp.x + 5 * zoom, pp.y - 9 * zoom, 6 * zoom, 1.5 * zoom);
+      // Bottom Drawer Handle
+      ctx.fillRect(pp.x + 5 * zoom, pp.y - 2 * zoom, 6 * zoom, 1.5 * zoom);
+      // Drawer Keyhole Lock
+      ctx.fillStyle = '#94a3b8';
+      ctx.beginPath();
+      ctx.arc(pp.x + 12 * zoom, pp.y - 11 * zoom, 0.9 * zoom, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 5. Sculpted Dual-Layer Beveled Tabletop
+      // Sub-bevel shadow overhang layer
+      drawIsometricBox(desk.x, desk.y, 1.54, 1.02, 21.5, '#0f172a', '#020617', '#020617');
+      // Main beveled desktop surface
+      drawIsometricBox(desk.x, desk.y, 1.6, 1.05, 23, deskTop, deskLeft, deskRight);
+
+      // Specular Chamfer Highlight along top front & top left edges
+      const hw = (1.6 * (TILE_W / 2)) * zoom;
+      const hl = (1.05 * (TILE_H / 2)) * zoom;
+      const bh = 23 * zoom;
+      ctx.strokeStyle = isAva ? 'rgba(255, 255, 255, 0.7)' : 'rgba(255, 255, 255, 0.35)';
+      ctx.lineWidth = 1.2 * zoom;
+      ctx.beginPath();
+      ctx.moveTo(dp.x - hw, dp.y + hl / 2 - bh);
+      ctx.lineTo(dp.x, dp.y + hl - bh);
+      ctx.lineTo(dp.x + hw, dp.y + hl / 2 - bh);
+      ctx.stroke();
+
+      // 6. Cable Management Desk Grommet & Articulated Vertebrae Cable Snake
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath();
+      ctx.ellipse(dp.x - 8 * zoom, dp.y - 20 * zoom, 2.5 * zoom, 1.3 * zoom, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 0.8 * zoom;
+      ctx.stroke();
+
+      // Articulated cable vertebrae descending to floor
+      ctx.fillStyle = '#1e293b';
+      for (let s = 0; s < 5; s++) {
+        ctx.fillRect(dp.x - 9 * zoom + (s % 2) * 0.8 * zoom, dp.y - 18 * zoom + s * 3.5 * zoom, 2.4 * zoom, 2.2 * zoom);
+      }
+
+      // 7. Bullpen Felt Acoustic Privacy Divider Screen (Felix & Archie)
+      if (isBullpen) {
+        const dividerP = isoToScreen(desk.x, desk.y - 0.45, 23);
+        ctx.fillStyle = '#334155';
+        ctx.fillRect(dividerP.x - 18 * zoom, dividerP.y - 12 * zoom, 36 * zoom, 12 * zoom);
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 1 * zoom;
+        ctx.strokeRect(dividerP.x - 18 * zoom, dividerP.y - 12 * zoom, 36 * zoom, 12 * zoom);
+
+        const pinColors = ['#fde047', '#38bdf8', '#f43f5e'];
+        for (let pn = 0; pn < 3; pn++) {
+          ctx.fillStyle = pinColors[pn];
+          ctx.fillRect(dividerP.x - 12 * zoom + pn * 11 * zoom, dividerP.y - 9 * zoom, 5 * zoom, 4 * zoom);
+        }
+      }
+
+      // 8. Ergonomic Mesh Office Chair at the desk
+      const seatCoord = getDeskSeat(desk);
+      drawErgonomicMeshChair(seatCoord.x, seatCoord.y, 'desk', isLead);
+
+      // 9. Workstation Monitors & Specialist Screen Visuals
+      const monY = dp.y - 39 * zoom;
+      const assignedAgent = agents.find(a => a.desk === desk);
+      const isWorking = assignedAgent && assignedAgent.isWorking;
+
+      // Heavy Die-Cast Aluminum Monitor Arm & Desk Clamp
+      ctx.fillStyle = '#475569';
+      ctx.fillRect(dp.x - 2 * zoom, monY + 12 * zoom, 4 * zoom, 8 * zoom);
+      ctx.fillRect(dp.x - 6 * zoom, monY + 18 * zoom, 12 * zoom, 3 * zoom);
+      ctx.fillStyle = '#64748b';
+      ctx.beginPath();
+      ctx.arc(dp.x, monY + 12 * zoom, 2.5 * zoom, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 1. Primary Ultrawide Curved Display (Center)
+      ctx.fillStyle = '#020617';
+      ctx.beginPath();
+      ctx.roundRect(dp.x - 17 * zoom, monY, 20 * zoom, 14 * zoom, 2 * zoom);
+      ctx.fill();
+      ctx.strokeStyle = isWorking ? '#10b981' : (isAva ? '#f43f5e' : (isHunter ? '#22c55e' : '#475569'));
+      ctx.lineWidth = 1.2 * zoom;
+      ctx.stroke();
+
+      // Screen Interior Content by Specialist
+      if (isHunter) {
+        // --- HUNTER: Real-time Cascading Matrix Code Rain ---
+        ctx.fillStyle = '#02241b';
+        ctx.fillRect(dp.x - 16 * zoom, monY + 1 * zoom, 18 * zoom, 12 * zoom);
+        for (let col = 0; col < 4; col++) {
+          const streamY = (globalTick * 1.5 + col * 9) % (12 * zoom);
+          ctx.fillStyle = '#34d399';
+          ctx.fillRect(dp.x - 15 * zoom + col * 4.5 * zoom, monY + 1 * zoom + streamY, 2.2 * zoom, 3 * zoom);
+          ctx.fillStyle = '#10b98170';
+          ctx.fillRect(dp.x - 15 * zoom + col * 4.5 * zoom, monY + 1 * zoom + Math.max(0, streamY - 4 * zoom), 2.2 * zoom, 2 * zoom);
+        }
+      } else if (isAva) {
+        // --- AVA: Vector Design Canvas with Bezier Curve & Palette Chips ---
+        ctx.fillStyle = '#1e1b4b';
+        ctx.fillRect(dp.x - 16 * zoom, monY + 1 * zoom, 18 * zoom, 12 * zoom);
+        ctx.strokeStyle = '#f43f5e';
+        ctx.lineWidth = 1.4 * zoom;
+        ctx.beginPath();
+        ctx.moveTo(dp.x - 14 * zoom, monY + 10 * zoom);
+        ctx.quadraticCurveTo(dp.x - 7 * zoom, monY + 3 * zoom, dp.x + 1 * zoom, monY + 8 * zoom);
+        ctx.stroke();
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillRect(dp.x - 14 * zoom, monY + 3 * zoom, 3 * zoom, 3 * zoom);
+        ctx.fillStyle = '#fde047';
+        ctx.fillRect(dp.x - 10 * zoom, monY + 3 * zoom, 3 * zoom, 3 * zoom);
+      } else if (isLead) {
+        // --- CLAUDE: Architectural UML Topology Graph with Pulsing Nodes ---
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(dp.x - 16 * zoom, monY + 1 * zoom, 18 * zoom, 12 * zoom);
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillRect(dp.x - 14 * zoom, monY + 4 * zoom, 4 * zoom, 3 * zoom);
+        ctx.fillStyle = '#10b981';
+        ctx.fillRect(dp.x - 5 * zoom, monY + 8 * zoom, 4 * zoom, 3 * zoom);
+        ctx.strokeStyle = '#64748b';
+        ctx.lineWidth = 1 * zoom;
+        ctx.beginPath();
+        ctx.moveTo(dp.x - 10 * zoom, monY + 5 * zoom);
+        ctx.lineTo(dp.x - 5 * zoom, monY + 9 * zoom);
+        ctx.stroke();
+      } else if (isTelecom) {
+        // --- TALLY: Audio Volume VU Meter Equalizer Bars ---
+        ctx.fillStyle = '#020617';
+        ctx.fillRect(dp.x - 16 * zoom, monY + 1 * zoom, 18 * zoom, 12 * zoom);
+        const vuColors = ['#10b981', '#34d399', '#fde047', '#ef4444'];
+        for (let bar = 0; bar < 4; bar++) {
+          const barH = 2 + Math.abs(Math.sin(globalTick * 0.15 + bar)) * 8 * zoom;
+          ctx.fillStyle = vuColors[bar % vuColors.length];
+          ctx.fillRect(dp.x - 14 * zoom + bar * 4 * zoom, monY + 12 * zoom - barH, 2.8 * zoom, barH);
+        }
+      } else if (isArchie) {
+        // --- ARCHIE: Markdown Documentation & CHANGELOG Split View ---
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(dp.x - 16 * zoom, monY + 1 * zoom, 18 * zoom, 12 * zoom);
+        // Amber Markdown Header "# CHANGELOG"
+        ctx.fillStyle = '#f59e0b';
+        ctx.fillRect(dp.x - 14 * zoom, monY + 3 * zoom, 13 * zoom, 2 * zoom);
+        // Cyan Tag "[Unreleased]"
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillRect(dp.x - 14 * zoom, monY + 6 * zoom, 8 * zoom, 1.4 * zoom);
+        // Formatted feature lines in emerald & slate
+        const docLines = ['#10b981', '#34d399', '#94a3b8'];
+        for (let dl = 0; dl < 3; dl++) {
+          const lw = 6 + ((globalTick * 1.5 + dl * 4) % 6) * zoom;
+          ctx.fillStyle = docLines[dl];
+          ctx.fillRect(dp.x - 12 * zoom, monY + 8.5 * zoom + dl * 1.8 * zoom, lw, 1.2 * zoom);
+        }
+      } else {
+        // --- BULLPEN / QA: Syntax-Highlighted Code Editor ---
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(dp.x - 16 * zoom, monY + 1 * zoom, 18 * zoom, 12 * zoom);
+        const codeColors = ['#f59e0b', '#38bdf8', '#ec4899', '#34d399', '#f8fafc'];
+        for (let line = 0; line < 4; line++) {
+          const lw = 4 + ((globalTick * 2 + line * 5) % 8) * zoom;
+          ctx.fillStyle = codeColors[(line + Math.floor(globalTick * 0.05)) % codeColors.length];
+          ctx.fillRect(dp.x - 14 * zoom, monY + 3 * zoom + line * 2.6 * zoom, lw, 1.5 * zoom);
+        }
+      }
+
+      // 2. Secondary Display (Right Screen)
+      ctx.fillStyle = '#020617';
+      ctx.beginPath();
+      ctx.roundRect(dp.x + 5 * zoom, monY - 2 * zoom, 13 * zoom, 15 * zoom, 2 * zoom);
+      ctx.fill();
+      ctx.strokeStyle = '#334155';
+      ctx.stroke();
+
+      ctx.fillStyle = isWorking ? '#06b6d4' : '#1e293b';
+      ctx.fillRect(dp.x + 6 * zoom, monY - 1 * zoom, 11 * zoom, 13 * zoom);
+      ctx.fillStyle = '#ffffff60';
+      for (let l = 0; l < 4; l++) {
+        ctx.fillRect(dp.x + 7 * zoom, monY + 1 * zoom + l * 3 * zoom, 8 * zoom, 1.5 * zoom);
+      }
+
+      // 3. Hunter's Third SOC Monitor (Left Screen)
+      if (isHunter) {
+        ctx.fillStyle = '#020617';
+        ctx.beginPath();
+        ctx.roundRect(dp.x - 30 * zoom, monY + 2 * zoom, 12 * zoom, 13 * zoom, 2 * zoom);
+        ctx.fill();
+        ctx.strokeStyle = '#10b981';
+        ctx.stroke();
+        ctx.fillStyle = '#02241b';
+        ctx.fillRect(dp.x - 29 * zoom, monY + 3 * zoom, 10 * zoom, 11 * zoom);
+        ctx.fillStyle = Math.sin(globalTick * 0.2) > 0 ? '#ef4444' : '#10b981';
+        ctx.fillRect(dp.x - 27 * zoom, monY + 5 * zoom, 6 * zoom, 2 * zoom);
+      }
+
+      // 10. Specialist Desk Gear & Accessories
+      // A. Claude's Executive Leather Blotter & Brass Lamp
+      if (isLead) {
+        ctx.fillStyle = '#1c1917';
+        ctx.fillRect(dp.x - 14 * zoom, dp.y - 19 * zoom, 22 * zoom, 8 * zoom);
+        ctx.strokeStyle = '#d97706';
+        ctx.lineWidth = 0.8 * zoom;
+        ctx.strokeRect(dp.x - 14 * zoom, dp.y - 19 * zoom, 22 * zoom, 8 * zoom);
+
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 1.5 * zoom;
+        ctx.beginPath();
+        ctx.moveTo(dp.x + 12 * zoom, dp.y - 18 * zoom);
+        ctx.lineTo(dp.x + 15 * zoom, dp.y - 30 * zoom);
+        ctx.lineTo(dp.x + 6 * zoom, dp.y - 32 * zoom);
+        ctx.stroke();
+        ctx.fillStyle = '#b45309';
+        ctx.fillRect(dp.x + 4 * zoom, dp.y - 33 * zoom, 5 * zoom, 3 * zoom);
+        const lampGlow = ctx.createRadialGradient(dp.x + 6 * zoom, dp.y - 18 * zoom, 2 * zoom, dp.x + 6 * zoom, dp.y - 18 * zoom, 14 * zoom);
+        lampGlow.addColorStop(0, 'rgba(253, 224, 71, 0.35)');
+        lampGlow.addColorStop(1, 'rgba(253, 224, 71, 0)');
+        ctx.fillStyle = lampGlow;
+        ctx.beginPath();
+        ctx.arc(dp.x + 6 * zoom, dp.y - 18 * zoom, 14 * zoom, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // B. Ava's Aluminum Headphone Stand & Pantone Swatches Fan
+      if (isAva) {
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 1.2 * zoom;
+        ctx.beginPath();
+        ctx.moveTo(dp.x + 14 * zoom, dp.y - 18 * zoom);
+        ctx.lineTo(dp.x + 14 * zoom, dp.y - 28 * zoom);
+        ctx.arc(dp.x + 14 * zoom, dp.y - 28 * zoom, 3 * zoom, Math.PI, 0);
+        ctx.stroke();
+        ctx.fillStyle = '#f43f5e';
+        ctx.fillRect(dp.x + 10 * zoom, dp.y - 28 * zoom, 2 * zoom, 4 * zoom);
+        ctx.fillRect(dp.x + 16 * zoom, dp.y - 28 * zoom, 2 * zoom, 4 * zoom);
+
+        const fanColors = ['#f43f5e', '#a855f7', '#38bdf8', '#10b981'];
+        fanColors.forEach((fc, fIdx) => {
+          ctx.fillStyle = fc;
+          ctx.fillRect(dp.x - 17 * zoom + fIdx * 2.5 * zoom, dp.y - 18 * zoom + fIdx * 1 * zoom, 4 * zoom, 2 * zoom);
+        });
+      }
+
+      // C. Victor's Mini Oscilloscope
+      if (isVictor) {
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(dp.x + 11 * zoom, dp.y - 26 * zoom, 10 * zoom, 8 * zoom);
+        ctx.strokeStyle = '#06b6d4';
+        ctx.lineWidth = 1 * zoom;
+        ctx.strokeRect(dp.x + 11 * zoom, dp.y - 26 * zoom, 10 * zoom, 8 * zoom);
+        ctx.strokeStyle = '#10b981';
+        ctx.beginPath();
+        ctx.moveTo(dp.x + 12 * zoom, dp.y - 22 * zoom);
+        ctx.lineTo(dp.x + 14 * zoom, dp.y - 24 * zoom);
+        ctx.lineTo(dp.x + 16 * zoom, dp.y - 20 * zoom);
+        ctx.lineTo(dp.x + 19 * zoom, dp.y - 22 * zoom);
+        ctx.stroke();
+      }
+
+      // D. Archie's Open Documentation Folio & Spec Binders
+      if (isArchie) {
+        // Open hardbound documentation folio
+        ctx.fillStyle = '#1e1b4b';
+        ctx.fillRect(dp.x - 16 * zoom, dp.y - 19 * zoom, 9 * zoom, 6 * zoom);
+        ctx.fillStyle = '#fef3c7'; // Cream parchment pages
+        ctx.fillRect(dp.x - 15 * zoom, dp.y - 18.5 * zoom, 3.8 * zoom, 5 * zoom);
+        ctx.fillRect(dp.x - 10.5 * zoom, dp.y - 18.5 * zoom, 3.8 * zoom, 5 * zoom);
+        // Amber bookmark ribbon
+        ctx.fillStyle = '#f59e0b';
+        ctx.fillRect(dp.x - 11 * zoom, dp.y - 19 * zoom, 1 * zoom, 6 * zoom);
+
+        // Stack of colorful specification ring-binders on right
+        ctx.fillStyle = '#d97706';
+        ctx.fillRect(dp.x + 12 * zoom, dp.y - 23 * zoom, 8 * zoom, 2 * zoom);
+        ctx.fillStyle = '#0284c7';
+        ctx.fillRect(dp.x + 12 * zoom, dp.y - 25.5 * zoom, 8 * zoom, 2 * zoom);
+      }
+
+      // 11. Custom Backlit Mechanical Keyboard & Ceramic Coffee Mug
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(dp.x - 8 * zoom, dp.y - 18 * zoom, 12 * zoom, 5 * zoom);
+      const rgbColor = isWorking 
+        ? '#34d399' 
+        : ['#ec4899', '#8b5cf6', '#3b82f6', '#10b981'][Math.floor((globalTick * 0.05) % 4)];
+      ctx.fillStyle = rgbColor;
+      ctx.fillRect(dp.x - 7 * zoom, dp.y - 17 * zoom, 10 * zoom, 3 * zoom);
+
+      // Ceramic Coffee Mug with Steam & Handle
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(dp.x + 8 * zoom, dp.y - 20 * zoom, 4.5 * zoom, 5.5 * zoom);
+      ctx.fillStyle = '#78350f'; // Dark roast coffee
+      ctx.fillRect(dp.x + 8.5 * zoom, dp.y - 20 * zoom, 3.5 * zoom, 1.8 * zoom);
+      ctx.strokeStyle = '#f8fafc';
+      ctx.lineWidth = 1 * zoom;
+      ctx.beginPath();
+      ctx.arc(dp.x + 13 * zoom, dp.y - 17 * zoom, 1.8 * zoom, -Math.PI / 2, Math.PI / 2);
+      ctx.stroke();
+    }
+
+    // --- 6. Handcrafted 16-Bit Pixel-Art Sprites & Lifelike Animations ---
+    function drawSingleAgent(agent) {
+      const lerpSpeed = 0.06 * simSpeed;
+      const dx = agent.targetPos.x - agent.currentPos.x;
+      const dy = agent.targetPos.y - agent.currentPos.y;
+      const dist = Math.hypot(dx, dy);
+
+      if (dist > 0.05) {
+        agent.currentPos.x += (dx / dist) * Math.min(dist, lerpSpeed);
+        agent.currentPos.y += (dy / dist) * Math.min(dist, lerpSpeed);
+        agent.state = 'walking';
+      } else {
+        agent.currentPos.x = agent.targetPos.x;
+        agent.currentPos.y = agent.targetPos.y;
+        if (agent.state === 'walking') {
+          const seat = getDeskSeat(agent.desk);
+          agent.state = (Math.hypot(agent.currentPos.x - seat.x, agent.currentPos.y - seat.y) < 0.1) 
+            ? 'coding' 
+            : 'thinking';
+        }
+      }
+
+      const p = isoToScreen(agent.currentPos.x, agent.currentPos.y, 0);
+      const isSelected = selectedAgent && selectedAgent.id === agent.id;
+      const isHovered = hoveredAgent && hoveredAgent.id === agent.id;
+
+      // 1. Radar Beacon Ring on Floor for Active Workers
+      if (agent.isWorking) {
+        const pulse = (globalTick * 0.06) % 1;
+        ctx.strokeStyle = `rgba(16, 185, 129, ${1 - pulse})`;
+        ctx.lineWidth = 2.5 * zoom;
+        ctx.beginPath();
+        ctx.ellipse(p.x, p.y + 4 * zoom, (14 + pulse * 18) * zoom, (7 + pulse * 9) * zoom, 0, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.fillStyle = 'rgba(16, 185, 129, 0.22)';
+        ctx.beginPath();
+        ctx.ellipse(p.x, p.y + 4 * zoom, 14 * zoom, 7 * zoom, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Soft Radial Contact Shadow on Floor
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+      ctx.beginPath();
+      ctx.ellipse(p.x, p.y + 4 * zoom, 12 * zoom, 6 * zoom, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Selection / Hover Halo
+      if (isSelected || isHovered) {
+        ctx.strokeStyle = isSelected ? '#38bdf8' : '#818cf8';
+        ctx.lineWidth = 2 * zoom;
+        ctx.beginPath();
+        ctx.ellipse(p.x, p.y + 4 * zoom, 16 * zoom, 8 * zoom, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      // Natural Breathing & Typing Bobs
+      const walkBob = (agent.state === 'walking') ? Math.sin(globalTick * 0.4 * simSpeed) * 2.5 * zoom : 0;
+      const breatheBob = (agent.state !== 'walking') ? Math.sin(globalTick * 0.08) * 0.7 * zoom : 0;
+      const typeBob = (agent.state === 'coding') ? Math.sin(globalTick * 0.25 * simSpeed) * 0.8 * zoom : 0;
+      const cy = p.y - 14 * zoom + walkBob + breatheBob + typeBob;
+
+      // Legs & Footwear
+      ctx.fillStyle = agent.pantsColor || '#0f172a';
+      ctx.fillRect(p.x - 4 * zoom, cy + 8 * zoom, 3 * zoom, 8 * zoom);
+      ctx.fillRect(p.x + 1 * zoom, cy + 8 * zoom, 3 * zoom, 8 * zoom);
+      // Shoe soles
+      ctx.fillStyle = '#e2e8f0';
+      ctx.fillRect(p.x - 4.5 * zoom, cy + 15 * zoom, 4 * zoom, 2 * zoom);
+      ctx.fillRect(p.x + 0.5 * zoom, cy + 15 * zoom, 4 * zoom, 2 * zoom);
+
+      // Torso (Shirt / Jacket / Cardigan with Collar Shading)
+      ctx.fillStyle = agent.shirtColor;
+      ctx.fillRect(p.x - 6 * zoom, cy - 4 * zoom, 12 * zoom, 12 * zoom);
+
+      // Jacket Lapel / Collar Depth
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+      ctx.fillRect(p.x - 2 * zoom, cy - 4 * zoom, 4 * zoom, 8 * zoom);
+
+      // Shaded Head with 3D Face Tone
+      ctx.fillStyle = '#fcd34d'; // Warm peach skin
+      ctx.fillRect(p.x - 5 * zoom, cy - 14 * zoom, 10 * zoom, 10 * zoom);
+      // Jawline shading
+      ctx.fillStyle = '#f59e0b';
+      ctx.fillRect(p.x - 5 * zoom, cy - 5 * zoom, 10 * zoom, 1.5 * zoom);
+
+      // Expressive Pixel Eyes with Natural Blink Cycle
+      const blinkCycle = (globalTick + (agent.name.charCodeAt(0) || 0) * 9) % 210;
+      const isBlinking = blinkCycle > 202;
+
+      if (!isBlinking) {
+        ctx.fillStyle = '#0f172a'; // Dark iris
+        ctx.fillRect(p.x - 3 * zoom, cy - 10 * zoom, 2 * zoom, 3 * zoom);
+        ctx.fillRect(p.x + 1 * zoom, cy - 10 * zoom, 2 * zoom, 3 * zoom);
+        // White specular glint
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(p.x - 3 * zoom, cy - 10 * zoom, 1 * zoom, 1 * zoom);
+        ctx.fillRect(p.x + 1 * zoom, cy - 10 * zoom, 1 * zoom, 1 * zoom);
+      } else {
+        // Eyelid slit
+        ctx.fillStyle = '#d97706';
+        ctx.fillRect(p.x - 3 * zoom, cy - 9 * zoom, 2.5 * zoom, 1 * zoom);
+        ctx.fillRect(p.x + 0.5 * zoom, cy - 9 * zoom, 2.5 * zoom, 1 * zoom);
+      }
+
+      // Hair
+      ctx.fillStyle = agent.hairColor;
+      ctx.fillRect(p.x - 6 * zoom, cy - 17 * zoom, 12 * zoom, 5 * zoom);
+      // Sideburns / bangs
+      ctx.fillRect(p.x - 6 * zoom, cy - 14 * zoom, 2 * zoom, 4 * zoom);
+      ctx.fillRect(p.x + 4 * zoom, cy - 14 * zoom, 2 * zoom, 4 * zoom);
+
+      // Specialist Character Customization
+      if (agent.name === 'Ava') {
+        // AVA: Vibrant coral-rose styled bob + cyan studio headphones with glowing earcups
+        ctx.fillStyle = '#f43f5e';
+        ctx.fillRect(p.x - 6.5 * zoom, cy - 18 * zoom, 13 * zoom, 6 * zoom);
+        ctx.fillRect(p.x - 7 * zoom, cy - 13 * zoom, 3 * zoom, 6 * zoom);
+        // Studio Headphones
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillRect(p.x - 8 * zoom, cy - 12 * zoom, 2.5 * zoom, 6 * zoom);
+        ctx.fillRect(p.x + 5.5 * zoom, cy - 12 * zoom, 2.5 * zoom, 6 * zoom);
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 1.8 * zoom;
+        ctx.beginPath();
+        ctx.arc(p.x, cy - 15 * zoom, 7 * zoom, Math.PI, 0);
+        ctx.stroke();
+      } else if (agent.name === 'Hunter') {
+        // HUNTER: Tactical Black Cyber-Hoodie + Glowing Emerald Visor with Scanlines
+        ctx.fillStyle = '#020617';
+        ctx.fillRect(p.x - 6.5 * zoom, cy - 18 * zoom, 13 * zoom, 6 * zoom);
+        ctx.fillRect(p.x - 6.5 * zoom, cy - 14 * zoom, 2.5 * zoom, 8 * zoom);
+        ctx.fillRect(p.x + 4 * zoom, cy - 14 * zoom, 2.5 * zoom, 8 * zoom);
+        // Glowing Cyber Visor
+        ctx.fillStyle = '#10b981';
+        ctx.fillRect(p.x - 4.5 * zoom, cy - 11 * zoom, 9 * zoom, 3 * zoom);
+        // Visor scanline
+        ctx.fillStyle = '#34d399';
+        ctx.fillRect(p.x - 4.5 * zoom, cy - 10 * zoom, 9 * zoom, 1 * zoom);
+      } else if (agent.isPrimary) {
+        // CLAUDE: Regal Golden Crown with Sapphire Gem
+        ctx.fillStyle = '#f59e0b';
+        ctx.fillRect(p.x - 5 * zoom, cy - 20 * zoom, 10 * zoom, 4 * zoom);
+        // Crown points
+        ctx.beginPath();
+        ctx.moveTo(p.x - 5 * zoom, cy - 20 * zoom);
+        ctx.lineTo(p.x - 4 * zoom, cy - 23 * zoom);
+        ctx.lineTo(p.x, cy - 20 * zoom);
+        ctx.lineTo(p.x + 4 * zoom, cy - 23 * zoom);
+        ctx.lineTo(p.x + 5 * zoom, cy - 20 * zoom);
+        ctx.closePath();
+        ctx.fill();
+        // Center Sapphire
+        ctx.fillStyle = '#2563eb';
+        ctx.fillRect(p.x - 1 * zoom, cy - 21 * zoom, 2 * zoom, 2 * zoom);
+      } else if (agent.name === 'Victor') {
+        // VICTOR: Lab coat collar & cyan safety goggles on forehead
+        ctx.fillStyle = '#06b6d4';
+        ctx.fillRect(p.x - 4 * zoom, cy - 16 * zoom, 8 * zoom, 2.5 * zoom);
+      } else if (agent.name === 'Archie') {
+        // ARCHIE: Round intellectual dark-rimmed glasses
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 1 * zoom;
+        ctx.strokeRect(p.x - 3.5 * zoom, cy - 10.5 * zoom, 3 * zoom, 3 * zoom);
+        ctx.strokeRect(p.x + 0.5 * zoom, cy - 10.5 * zoom, 3 * zoom, 3 * zoom);
+      } else if (agent.name === 'Tally') {
+        // TALLY: Headset with slender boom mic curving to mouth
+        ctx.fillStyle = '#10b981';
+        ctx.fillRect(p.x - 6.5 * zoom, cy - 12 * zoom, 2 * zoom, 4 * zoom);
+        ctx.strokeStyle = '#10b981';
+        ctx.lineWidth = 1 * zoom;
+        ctx.beginPath();
+        ctx.moveTo(p.x - 5 * zoom, cy - 10 * zoom);
+        ctx.lineTo(p.x - 1 * zoom, cy - 7 * zoom);
+        ctx.stroke();
+      }
+
+      // Hands Typing Motion on Keyboard
+      if (agent.state === 'coding') {
+        ctx.fillStyle = '#fcd34d';
+        const speedFactor = agent.isWorking ? 0.7 : 0.3;
+        const handOffset = (Math.sin(globalTick * speedFactor) > 0) ? 1.5 * zoom : -1.5 * zoom;
+        ctx.fillRect(p.x - 5 * zoom, cy + 4 * zoom + handOffset, 3 * zoom, 3 * zoom);
+        ctx.fillRect(p.x + 2 * zoom, cy + 4 * zoom - handOffset, 3 * zoom, 3 * zoom);
+        if (agent.isWorking && globalTick % 12 === 0 && Math.random() < 0.25) {
+          sound.playTyping();
+        }
+      }
+
+      // Queue overlay item for depth-independent, anti-collision rendering pass
+      agentOverlayQueue.push({ agent, x: p.x, headY: cy - 18 * zoom });
+    }
+
+    // --- 6. Anti-Collision Overlay System (Speech Bubbles & Compact Status Badges) ---
+    function renderAllAgentOverlays(queue) {
+      if (!queue || queue.length === 0) return;
+
+      const itemsToRender = [];
+
+      queue.forEach(({ agent, x, headY }) => {
+        const isSelected = selectedAgent && selectedAgent.id === agent.id;
+        const isHovered = hoveredAgent && hoveredAgent.id === agent.id;
+        const isWorking = agent.isWorking;
+        const isRecentDone = agent.completedFlash && agent.completedFlash > 0;
+
+        let showFullBubble = false;
+        if (bubbleMode === 'all') {
+          showFullBubble = true;
+        } else if (bubbleMode === 'activeOnly') {
+          showFullBubble = isWorking || isSelected || isHovered;
+        } else {
+          // 'smart' mode (default): full bubble for active workers, selected, hovered, or freshly completed
+          showFullBubble = isWorking || isSelected || isHovered || isRecentDone;
+        }
+
+        if (showFullBubble) {
+          // --- FULL COMIC SPEECH BUBBLE ---
+          let icon = isWorking ? '⚡' : (agent.status === 'completed' ? '✓' : '💤');
+          let statusColor = isWorking ? '#34d399' : (agent.status === 'completed' ? '#38bdf8' : '#94a3b8');
+          let borderColor = isSelected ? '#ffffff' : (isWorking ? '#10b981' : (agent.color || '#475569'));
+          
+          let toolName = agent.tool || (isWorking ? 'Working' : (agent.status === 'completed' ? 'Done' : 'Idle'));
+          if (toolName === 'SubagentHandback') toolName = 'Verified';
+          const headerTitle = `${agent.name}`;
+
+          let subtitle = '';
+          if (isWorking) {
+            if (agent.currentAction) {
+              subtitle = agent.currentAction;
+            } else if (agent.files && agent.files.length > 0) {
+              subtitle = `Edit: ${agent.files[0]}`;
+            } else {
+              subtitle = 'Executing command...';
+            }
+          } else if (agent.status === 'completed') {
+            subtitle = agent.files && agent.files.length > 0 ? `Verified: ${agent.files[0]}` : 'Task Completed';
+          } else {
+            subtitle = 'Idle at workstation';
+          }
+
+          // Truncate cleanly to prevent horizontal ballooning
+          if (subtitle.length > 38) {
+            subtitle = subtitle.slice(0, 35) + '..';
+          }
+
+          ctx.save();
+          const titleFont = `bold ${Math.max(11, 12 * zoom)}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+          const monoFont = `${Math.max(9.5, 10.5 * zoom)}px "JetBrains Mono", Consolas, monospace`;
+          const tagFont = `bold ${Math.max(8.5, 9.5 * zoom)}px -apple-system, monospace`;
+
+          ctx.font = titleFont;
+          const titleW = ctx.measureText(`${icon} ${headerTitle}`).width;
+
+          ctx.font = tagFont;
+          const toolBadgeW = ctx.measureText(toolName).width + 12 * zoom;
+
+          ctx.font = monoFont;
+          const subW = subtitle ? ctx.measureText(subtitle).width : 0;
+          ctx.restore();
+
+          const bw = Math.max(104 * zoom, Math.max(titleW + toolBadgeW + 20 * zoom, subW + 20 * zoom));
+          const bh = subtitle ? 38 * zoom : 24 * zoom;
+          const bx = x - bw / 2;
+          const by = headY - bh - 8 * zoom;
+
+          itemsToRender.push({
+            type: 'bubble',
+            agent,
+            anchorX: x,
+            anchorY: headY,
+            bx,
+            by,
+            bw,
+            bh,
+            icon,
+            headerTitle,
+            toolName,
+            subtitle,
+            statusColor,
+            borderColor,
+            isSelected,
+            isWorking,
+            isHovered
+          });
+        } else {
+          // --- COMPACT RETRO STATUS PILL ---
+          const statusIcon = agent.status === 'completed' ? '✓' : '';
+          const roleTag = agent.name === 'Claude' ? '[LEAD]' : (agent.name === 'Ava' ? '[DESIGN]' : (agent.name === 'Hunter' ? '[SECURITY]' : (agent.name === 'Felix' ? '[BACKEND]' : (agent.name === 'Archie' ? '[DOCS]' : (agent.name === 'Tally' ? '[TELECOM]' : (agent.name === 'Victor' ? '[QA]' : '[AGENT]'))))));
+          const text = `${agent.avatar} ${agent.name} ${roleTag} ${statusIcon}`.trim();
+
+          ctx.save();
+          ctx.font = `bold ${Math.max(10, 11 * zoom)}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+          const tw = ctx.measureText(text).width;
+          ctx.restore();
+
+          const bw = tw + 16 * zoom;
+          const bh = 18 * zoom;
+          const bx = x - bw / 2;
+          const by = headY - bh - 4 * zoom;
+
+          itemsToRender.push({
+            type: 'badge',
+            agent,
+            anchorX: x,
+            anchorY: headY,
+            bx,
+            by,
+            bw,
+            bh,
+            text,
+            isSelected,
+            isHovered
+          });
+        }
+      });
+
+      // Multi-pass Anti-Collision Relaxation Engine
+      for (let iter = 0; iter < 5; iter++) {
+        let hadCollision = false;
+        for (let i = 0; i < itemsToRender.length; i++) {
+          for (let j = i + 1; j < itemsToRender.length; j++) {
+            const a = itemsToRender[i];
+            const b = itemsToRender[j];
+
+            const overlapX = (a.bw + b.bw) / 2 + 8 * zoom - Math.abs((a.bx + a.bw / 2) - (b.bx + b.bw / 2));
+            const overlapY = (a.bh + b.bh) / 2 + 6 * zoom - Math.abs((a.by + a.bh / 2) - (b.by + b.bh / 2));
+
+            if (overlapX > 0 && overlapY > 0) {
+              hadCollision = true;
+              const shiftY = Math.ceil(overlapY / 2) + 2 * zoom;
+              if (a.by <= b.by) {
+                a.by -= shiftY;
+                b.by += shiftY;
+              } else {
+                a.by += shiftY;
+                b.by -= shiftY;
+              }
+            }
+          }
+        }
+        if (!hadCollision) break;
+      }
+
+      // Draw all resolved badges and bubbles
+      itemsToRender.forEach(item => {
+        if (item.type === 'bubble') {
+          drawResolvedSpeechBubble(item);
+        } else {
+          drawResolvedCompactBadge(item);
+        }
+      });
+    }
+
+    function drawResolvedSpeechBubble(b) {
+      ctx.save();
+
+      // Drop shadow for comic pop-in elevation
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.55)';
+      ctx.shadowBlur = 8 * zoom;
+      ctx.shadowOffsetY = 3 * zoom;
+
+      // Bubble body container
+      ctx.fillStyle = isNightMode ? 'rgba(15, 23, 42, 0.95)' : 'rgba(255, 255, 255, 0.98)';
+      ctx.beginPath();
+      ctx.roundRect(b.bx, b.by, b.bw, b.bh, 6 * zoom);
+      ctx.fill();
+
+      // Triangular tail directed to agent head
+      const tailCenterX = Math.max(b.bx + 8 * zoom, Math.min(b.bx + b.bw - 8 * zoom, b.anchorX));
+      ctx.beginPath();
+      ctx.moveTo(tailCenterX - 4 * zoom, b.by + b.bh);
+      ctx.lineTo(tailCenterX, Math.min(b.by + b.bh + 8 * zoom, b.anchorY));
+      ctx.lineTo(tailCenterX + 4 * zoom, b.by + b.bh);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetY = 0;
+
+      // High-contrast border stroke
+      ctx.strokeStyle = b.borderColor;
+      ctx.lineWidth = b.isSelected ? 2.2 : (b.isWorking ? 1.6 : 1.0);
+      ctx.stroke();
+
+      // Tail stroke outline
+      ctx.beginPath();
+      ctx.moveTo(tailCenterX - 4 * zoom, b.by + b.bh);
+      ctx.lineTo(tailCenterX, Math.min(b.by + b.bh + 8 * zoom, b.anchorY));
+      ctx.lineTo(tailCenterX + 4 * zoom, b.by + b.bh);
+      ctx.stroke();
+
+      // Row 1: Left: Icon + Agent Name
+      const fontSize = Math.max(9, 9.5 * zoom);
+      ctx.font = `bold ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+      ctx.fillStyle = isNightMode ? '#f8fafc' : '#0f172a';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      ctx.fillText(`${b.icon} ${b.headerTitle}`, b.bx + 7 * zoom, b.by + 5 * zoom);
+
+      // Row 1: Right: Tool Tag Pill
+      if (b.toolName) {
+        const tagFont = `bold ${Math.max(7.5, 8 * zoom)}px monospace`;
+        ctx.font = tagFont;
+        const tagW = ctx.measureText(b.toolName).width + 8 * zoom;
+        const tagH = 12 * zoom;
+        const tagX = b.bx + b.bw - tagW - 6 * zoom;
+        const tagY = b.by + 4.5 * zoom;
+
+        ctx.fillStyle = b.isWorking ? 'rgba(16, 185, 129, 0.25)' : (isNightMode ? '#334155' : '#e2e8f0');
+        ctx.beginPath();
+        ctx.roundRect(tagX, tagY, tagW, tagH, 3 * zoom);
+        ctx.fill();
+
+        ctx.fillStyle = b.isWorking ? '#34d399' : (isNightMode ? '#cbd5e1' : '#475569');
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(b.toolName, tagX + tagW / 2, tagY + tagH / 2);
+      }
+
+      // Row 2: Subtitle (Command / File) - Generous 16px vertical clearance prevents any overlap
+      if (b.subtitle) {
+        ctx.font = `${Math.max(8, 8.5 * zoom)}px "JetBrains Mono", Consolas, monospace`;
+        ctx.fillStyle = b.isWorking ? '#34d399' : (isNightMode ? '#94a3b8' : '#64748b');
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'top';
+        ctx.fillText(b.subtitle, b.bx + 7 * zoom, b.by + 21 * zoom);
+      }
+
+      // Pulsing Execution Dot
+      if (b.isWorking) {
+        ctx.fillStyle = '#34d399';
+        ctx.beginPath();
+        ctx.arc(b.bx + b.bw - 4 * zoom, b.by + 4 * zoom, 2.5 * zoom, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.restore();
+    }
+
+    function drawResolvedCompactBadge(badge) {
+      ctx.save();
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+      ctx.shadowBlur = 4 * zoom;
+      ctx.shadowOffsetY = 2 * zoom;
+
+      // Sleek rounded pill
+      ctx.fillStyle = isNightMode ? 'rgba(15, 23, 42, 0.92)' : 'rgba(255, 255, 255, 0.95)';
+      ctx.beginPath();
+      ctx.roundRect(badge.bx, badge.by, badge.bw, badge.bh, 8 * zoom);
+      ctx.fill();
+
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetY = 0;
+
+      // Border outline
+      ctx.strokeStyle = badge.isSelected ? '#38bdf8' : (badge.isHovered ? '#818cf8' : (isNightMode ? '#334155' : '#cbd5e1'));
+      ctx.lineWidth = (badge.isSelected || badge.isHovered) ? 1.8 : 1.0;
+      ctx.stroke();
+
+      // Pointer tail pip
+      ctx.fillStyle = isNightMode ? 'rgba(15, 23, 42, 0.92)' : 'rgba(255, 255, 255, 0.95)';
+      ctx.beginPath();
+      ctx.moveTo(badge.anchorX - 3 * zoom, badge.by + badge.bh);
+      ctx.lineTo(badge.anchorX, badge.by + badge.bh + 3 * zoom);
+      ctx.lineTo(badge.anchorX + 3 * zoom, badge.by + badge.bh);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Badge Label text
+      ctx.font = `bold ${Math.max(10, 11 * zoom)}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+      ctx.fillStyle = isNightMode ? '#f1f5f9' : '#0f172a';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(badge.text, badge.bx + badge.bw / 2, badge.by + badge.bh / 2);
+
+      ctx.restore();
+    }
+
+    function renderWorkstationsAndAgents() {
+      agentOverlayQueue = [];
+
+      // Depth-sort desks and agents together so they occlude naturally in 2.5D space
+      const sceneItems = [
+        ...DESK_SLOTS.map((desk, idx) => ({ type: 'desk', depth: desk.x + desk.y, desk, idx })),
+        ...agents.map(agent => ({ type: 'agent', depth: agent.currentPos.x + agent.currentPos.y, agent }))
+      ].sort((a, b) => a.depth - b.depth);
+
+      sceneItems.forEach(item => {
+        if (item.type === 'desk') {
+          drawSingleDesk(item.desk, item.idx);
+        } else if (item.type === 'agent') {
+          drawSingleAgent(item.agent);
+        }
+      });
+
+      // Render all labels, speech bubbles, and badges in non-overlapping overlay pass
+      renderAllAgentOverlays(agentOverlayQueue);
+    }
+
+    function updateAndRenderParticles() {
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx * simSpeed;
+        p.y += p.vy * simSpeed;
+        p.life -= 0.02 * simSpeed;
+
+        if (p.life <= 0) {
+          particles.splice(i, 1);
+          continue;
+        }
+
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.beginPath();
+        if (p.isConfetti) {
+          ctx.fillRect(p.x, p.y, p.size, p.size);
+        } else {
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1.0;
+      }
+    }
+
+    function spawnConfetti(count = 50) {
+      const colors = ['#f43f5e', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'];
+      const rect = canvas.getBoundingClientRect();
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x: rect.width / 2 + (Math.random() - 0.5) * 450,
+          y: 40 + Math.random() * 100,
+          vx: (Math.random() - 0.5) * 3,
+          vy: 1.5 + Math.random() * 2,
+          life: 1.5,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          size: 4 + Math.random() * 3,
+          isConfetti: true,
+        });
+      }
+    }
+
+    // --- 7. Atmospheric Lighting & Retro CRT Post-Processing ---
+    function renderAtmosphericLighting() {
+      // 1. Emissive Monitor Glow Pools on Workstation Desktops
+      agents.forEach(ag => {
+        if (ag.isWorking) {
+          const dp = isoToScreen(ag.desk.x, ag.desk.y, 0);
+          const glowColor = ag.name === 'Hunter' 
+            ? 'rgba(16, 185, 129, 0.28)' 
+            : (ag.name === 'Ava' 
+              ? 'rgba(244, 63, 94, 0.28)' 
+              : 'rgba(56, 189, 248, 0.28)');
+          
+          const glow = ctx.createRadialGradient(dp.x, dp.y - 28 * zoom, 2 * zoom, dp.x, dp.y - 18 * zoom, 26 * zoom);
+          glow.addColorStop(0, glowColor);
+          glow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+          ctx.fillStyle = glow;
+          ctx.beginPath();
+          ctx.ellipse(dp.x, dp.y - 18 * zoom, 24 * zoom, 13 * zoom, 0, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+
+      // 2. Cinematic Ambient Vignette around Canvas Edges
+      const rect = canvas.getBoundingClientRect();
+      const vignette = ctx.createRadialGradient(rect.width / 2, rect.height / 2, rect.width * 0.35, rect.width / 2, rect.height / 2, rect.width * 0.75);
+      vignette.addColorStop(0, 'rgba(0, 0, 0, 0)');
+      vignette.addColorStop(1, isNightMode ? 'rgba(3, 7, 18, 0.45)' : 'rgba(0, 0, 0, 0.15)');
+      ctx.fillStyle = vignette;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function renderCRTEffect() {
+      // Authentic Retro Arcade Horizontal Scanlines
+      const h = canvas.height;
+      const w = canvas.width;
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.18)';
+      for (let y = 0; y < h; y += 3) {
+        ctx.fillRect(0, y, w, 1);
+      }
+      // Faint Phosphor Glow
+      ctx.fillStyle = 'rgba(56, 189, 248, 0.02)';
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    // --- Main Game Loop ---
+    function renderLoop() {
+      if (!isPaused) {
+        globalTick += 1 * simSpeed;
+      }
+      agents.forEach(ag => {
+        if (ag.completedFlash && ag.completedFlash > 0) {
+          ag.completedFlash -= 1 * simSpeed;
+        }
+      });
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      renderOfficeFloor();
+      renderRoomFixtures();
+      renderWorkstationsAndAgents();
+      updateAndRenderParticles();
+      renderAtmosphericLighting();
+      if (isCRTMode) renderCRTEffect();
+      requestAnimationFrame(renderLoop);
+    }
+    requestAnimationFrame(renderLoop);
+
+    // --- 7. Mouse Pan & Drag Controls with Agent Hover Detection ---
+    canvas.addEventListener('mousedown', (e) => {
+      if (e.button === 0) {
+        isDragging = true;
+        startDragX = e.clientX - panX;
+        startDragY = e.clientY - panY;
+      }
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      if (isDragging) return;
+      const rect = canvas.getBoundingClientRect();
+      const sx = e.clientX - rect.left;
+      const sy = e.clientY - rect.top;
+
+      let closest = null;
+      let minDist = 36 * zoom;
+
+      agents.forEach(ag => {
+        const p = isoToScreen(ag.currentPos.x, ag.currentPos.y, 0);
+        const dist = Math.hypot(p.x - sx, (p.y - 14 * zoom) - sy);
+        if (dist < minDist) {
+          minDist = dist;
+          closest = ag;
+        }
+      });
+
+      if (closest !== hoveredAgent) {
+        hoveredAgent = closest;
+        canvas.style.cursor = closest ? 'pointer' : 'grab';
+      }
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+      hoveredAgent = null;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (isDragging) {
+        panX = e.clientX - startDragX;
+        panY = e.clientY - startDragY;
+      }
+    });
+
+    window.addEventListener('mouseup', () => {
+      isDragging = false;
+      canvas.style.cursor = hoveredAgent ? 'pointer' : 'grab';
+    });
+
+    canvas.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const delta = e.deltaY < 0 ? 0.08 : -0.08;
+      zoom = Math.max(0.65, Math.min(1.8, zoom + delta));
+      document.getElementById('zoom-level').innerText = `${Math.round(zoom * 100)}%`;
+    }, { passive: false });
+
+    document.getElementById('zoom-in').onclick = () => {
+      zoom = Math.min(1.8, zoom + 0.15);
+      document.getElementById('zoom-level').innerText = `${Math.round(zoom * 100)}%`;
+    };
+
+    document.getElementById('zoom-out').onclick = () => {
+      zoom = Math.max(0.65, zoom - 0.15);
+      document.getElementById('zoom-level').innerText = `${Math.round(zoom * 100)}%`;
+    };
+
+    document.getElementById('zoom-reset').onclick = () => {
+      zoom = 1.0;
+      panX = 0;
+      panY = 0;
+      document.getElementById('zoom-level').innerText = '100%';
+    };
+
+    // Quick-Focus Department & Specialist Navigation Buttons
+    document.querySelectorAll('.nav-focus').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.dataset.target;
+        const rect = canvas.getBoundingClientRect();
+        const originX = rect.width / 2;
+        const originY = 50;
+
+        let tgx = 12.0, tgy = 10.0, tZoom = 1.0;
+        let matchedAgent = null;
+
+        if (target === 'all') {
+          zoom = 1.0;
+          panX = 0;
+          panY = 0;
+          document.getElementById('zoom-level').innerText = '100%';
+          return;
+        } else if (target === 'claude') {
+          tgx = 10.5; tgy = 3.5; tZoom = 1.35;
+          matchedAgent = agents.find(a => a.name === 'Claude');
+        } else if (target === 'ava') {
+          tgx = 3.5; tgy = 10.0; tZoom = 1.35;
+          matchedAgent = agents.find(a => a.name === 'Ava');
+        } else if (target === 'hunter') {
+          tgx = 4.5; tgy = 16.5; tZoom = 1.35;
+          matchedAgent = agents.find(a => a.name === 'Hunter');
+        } else if (target === 'archie') {
+          tgx = 13.0; tgy = 11.0; tZoom = 1.35;
+          matchedAgent = agents.find(a => a.name === 'Archie');
+        } else if (target === 'victor') {
+          tgx = 18.0; tgy = 11.5; tZoom = 1.35;
+          matchedAgent = agents.find(a => a.name === 'Victor');
+        } else if (target === 'bullpen') {
+          tgx = 11.0; tgy = 10.0; tZoom = 1.2;
+        } else if (target === 'server') {
+          tgx = 19.0; tgy = 3.5; tZoom = 1.25;
+        } else if (target === 'warroom') {
+          tgx = 16.0; tgy = 16.5; tZoom = 1.2;
+        } else if (target === 'lounge') {
+          tgx = 3.5; tgy = 3.5; tZoom = 1.25;
+        }
+
+        zoom = tZoom;
+        document.getElementById('zoom-level').innerText = `${Math.round(zoom * 100)}%`;
+        panX = -(tgx - tgy) * (TILE_W / 2) * zoom;
+        panY = (rect.height / 2 - originY) - (tgx + tgy) * (TILE_H / 2) * zoom;
+
+        if (matchedAgent) {
+          selectAgent(matchedAgent);
+        }
+      });
+    });
+
+    document.getElementById('btn-expand').onclick = () => {
+      isExpanded = !isExpanded;
+      document.getElementById('expand-icon').innerText = isExpanded ? '✕' : '⛶';
+      document.getElementById('btn-expand').innerHTML = `${isExpanded ? '✕' : '⛶'} ${isExpanded ? 'Contract View' : 'Expand View'}`;
+      resizeCanvas();
+    };
+
+    // --- 8. Live Telemetry Fetcher & Collision-Free Squad Sync ---
+    const API_ENDPOINTS = [
+      'http://127.0.0.1:8000/api/agent-office/live',
+      'http://localhost:8000/api/agent-office/live',
+      '/api/agent-office/live'
+    ];
+
+    async function fetchLiveTelemetry() {
+      for (const endpoint of API_ENDPOINTS) {
+        try {
+          const res = await fetch(endpoint, { cache: 'no-store' });
+          if (res.ok) {
+            const data = await res.json();
+            handleLiveTelemetry(data);
+            return;
+          }
+        } catch (e) {
+          // try next fallback
+        }
+      }
+    }
+
+    function handleLiveTelemetry(data) {
+      if (!data) return;
+
+      if (data.session) {
+        document.getElementById('conn-badge').innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> CONNECTED`;
+        document.getElementById('model-name').innerText = data.session.model || 'Claude Opus 5.5';
+        claudeOrchestrator.isWorking = data.session.is_working;
+        claudeOrchestrator.status = data.session.is_working ? 'working' : 'idle';
+        claudeOrchestrator.state = data.session.is_working ? 'coding' : 'thinking';
+        if (!data.session.is_working) {
+          claudeOrchestrator.currentAction = 'Standing by (Lead Architect)';
+          claudeOrchestrator.thought = 'Architecture verified. Orchestrator standing by.';
+          claudeOrchestrator.tool = 'Idle';
+        }
+      }
+
+      if (data.git) {
+        document.getElementById('branch-name').innerText = data.git.branch;
+        if (data.git.recentCommits && data.git.recentCommits.length > 0) {
+          const c = data.git.recentCommits[0];
+          document.getElementById('git-commit-msg').innerText = `${c.hash}: ${c.message}`;
+        }
+      }
+
+      if (data.metrics) {
+        document.getElementById('tool-counter').innerText = `${data.metrics.totalToolCalls || 0} tool calls`;
+      }
+
+      if (data.recentEvents && data.recentEvents.length > 0) {
+        renderEventStream(data.recentEvents);
+      }
+
+      syncLiveSquad(data);
+    }
+
+    function renderEventStream(events) {
+      const terminal = document.getElementById('terminal-body');
+      terminal.innerHTML = '';
+      events.slice(-15).reverse().forEach(ev => {
+        const row = document.createElement('div');
+        row.className = 'flex items-start gap-1.5 leading-snug';
+        row.innerHTML = `
+          <span class="text-slate-500 shrink-0 text-[11px]">${ev.timestamp ? ev.timestamp.slice(11, 19) : 'LIVE'}</span>
+          <span class="text-indigo-400 font-bold shrink-0">[${escapeHtml(ev.source || 'Orchestrator')}]</span>
+          <span class="text-emerald-400 font-bold shrink-0">${escapeHtml(ev.tool || 'Action')}:</span>
+          <span class="text-slate-300 truncate">${escapeHtml(ev.detail || '')}</span>
+        `;
+        terminal.appendChild(row);
+      });
+    }
+
+    function syncLiveSquad(data) {
+      const liveSubagents = data.subagents || [];
+      document.getElementById('agent-count').innerText = 1 + liveSubagents.length;
+
+      liveSubagents.slice(0, 8).forEach((sub, idx) => {
+        // 1. Check if subagent matches a dedicated core engineer
+        let ag = null;
+        if (DEDICATED_DESKS[sub.name]) {
+          ag = agents.find(a => a.name.toLowerCase() === sub.name.toLowerCase());
+          if (ag) {
+            ag.id = sub.id;
+            ag.desk = DEDICATED_DESKS[sub.name];
+          }
+        }
+
+        // 2. If not a core squad name match, check by ID or existing subagent name
+        if (!ag) {
+          ag = agents.find(a => a.id === sub.id || a.name === sub.name || a.id.slice(0, 6) === sub.id.slice(0, 6));
+        }
+
+        // 3. If brand new guest subagent: only spawn if actively working
+        if (!ag) {
+          // Do not spawn finished historical subagents who have no work to do
+          if (sub.status === 'completed' || sub.is_working === false) {
+            return;
+          }
+
+          const occupied = new Set(agents.map(a => `${a.desk.x.toFixed(1)},${a.desk.y.toFixed(1)}`));
+          let freeSeat = EXTRA_SEATS.find(s => !occupied.has(`${s.x.toFixed(1)},${s.y.toFixed(1)}`));
+          if (!freeSeat) {
+            freeSeat = { x: 2.2 + (idx % 3) * 1.1, y: 1.5 + Math.floor(idx / 3) * 1.1, name: `Lounge Stool ${idx + 1}`, zone: "lounge" };
+          }
+
+          ag = {
+            id: sub.id,
+            name: sub.name || `Engineer ${idx + 1}`,
+            role: sub.role || sub.task.slice(0, 36) || 'Contractor Subagent',
+            avatar: ['⚡', '🎨', '🧪', '🧠', '🛡️', '📊', '⚙️', '🔍'][idx % 8],
+            color: ['#10b981', '#f43f5e', '#8b5cf6', '#f59e0b', '#06b6d4', '#ec4899', '#3b82f6', '#14b8a6'][idx % 8],
+            shirtColor: ['#10b981', '#f43f5e', '#8b5cf6', '#f59e0b', '#06b6d4', '#ec4899', '#3b82f6', '#14b8a6'][idx % 8],
+            pantsColor: '#1e293b',
+            hairColor: '#e2e8f0',
+            desk: freeSeat,
+            currentPos: getDeskSeat(freeSeat),
+            targetPos: getDeskSeat(freeSeat),
+            state: 'coding',
+            status: 'working',
+            isWorking: true,
+            thought: sub.task || 'Working on assigned task...',
+            tool: sub.lastTool || 'code',
+            currentAction: `${sub.lastTool || 'Tool'}: ${sub.files ? sub.files[0] || 'working' : 'working'}`,
+            files: sub.files || [],
+            toolCount: sub.toolCount || 0,
+            completedFlash: 0,
+            isPrimary: false,
+          };
+          agents.push(ag);
+        } else {
+          // Update existing agent state without changing their reserved desk
+          const wasWorking = ag.isWorking;
+          ag.role = sub.role || ag.role;
+          ag.tool = sub.lastTool || ag.tool;
+          ag.thought = sub.task || ag.thought;
+          ag.toolCount = sub.toolCount || ag.toolCount;
+          ag.files = sub.files && sub.files.length > 0 ? sub.files : ag.files;
+          ag.status = sub.status === 'completed' ? 'completed' : 'working';
+          ag.isWorking = sub.status !== 'completed';
+          if (wasWorking && sub.status === 'completed') {
+            ag.state = 'celebrating';
+            ag.currentAction = 'Handback (Verified)';
+            ag.completedFlash = 120; // 4s celebration popup before compacting
+            spawnConfetti(25);
+          }
+          if (ag.state === 'coding') {
+            ag.targetPos = getDeskSeat(ag.desk);
+          }
+        }
+      });
+
+      // 4. Reconcile core specialists with live session telemetry:
+      // If a dedicated core specialist is NOT currently running an active subagent task,
+      // transition them into idle / completed standing by state so they do not stay stuck working.
+      const liveNames = new Set(liveSubagents.map(s => s.name.toLowerCase()));
+      const activeLiveNames = new Set(
+        liveSubagents.filter(s => s.status !== 'completed' && s.is_working !== false).map(s => s.name.toLowerCase())
+      );
+
+      agents.forEach(ag => {
+        if (ag.id.startsWith('claude')) return; // Claude is orchestrator handled separately
+        const nameLower = ag.name.toLowerCase();
+        
+        if (DEDICATED_DESKS[ag.name] && !activeLiveNames.has(nameLower)) {
+          if (ag.isWorking) {
+            ag.isWorking = false;
+            ag.status = liveNames.has(nameLower) ? 'completed' : 'idle';
+            ag.state = 'thinking';
+            if (ag.status === 'idle') {
+              ag.currentAction = ag.name === 'Hunter' 
+                ? 'Standing by (Perimeter Secure)' 
+                : (ag.name === 'Victor' 
+                  ? 'Standing by (QA Passed)' 
+                  : (ag.name === 'Ava' 
+                    ? 'Standing by (Design System Synced)' 
+                    : (ag.name === 'Archie' 
+                      ? 'Standing by (Docs Synced)' 
+                      : 'Standing by at station')));
+              ag.thought = ag.name === 'Hunter'
+                ? 'Perimeter secure. All 31 security & IDOR tests passing.'
+                : 'Workstation standing by for next task.';
+              ag.tool = 'Idle';
+            }
+          }
+        }
+      });
+
+      // 5. Clean up guest subagents: only keep the 7 core specialists and actively working guests
+      const liveSubIds = new Set(liveSubagents.map(s => s.id));
+      agents = agents.filter(ag => {
+        if (ag.id.startsWith('claude') || DEDICATED_DESKS[ag.name]) {
+          return true; // Keep permanent squad members
+        }
+        // Guest contractor: keep only if still reported as actively working or celebrating
+        return liveSubIds.has(ag.id) && (ag.isWorking || (ag.completedFlash && ag.completedFlash > 0));
+      });
+
+      document.getElementById('agent-count').innerText = agents.length;
+      updateUI();
+    }
+
+    function escapeHtml(text) {
+      const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+      return text.replace(/[&<>"']/g, m => map[m]);
+    }
+
+    function logConsole(msg) {
+      const terminal = document.getElementById('terminal-body');
+      const row = document.createElement('div');
+      row.className = 'text-xs text-slate-300';
+      row.innerHTML = msg;
+      terminal.appendChild(row);
+      terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    function updateUI() {
+      // 1. Update Active Workers Ticker Pills
+      const activeBar = document.getElementById('active-workers-pills');
+      activeBar.innerHTML = '';
+      const working = agents.filter(a => a.isWorking);
+      document.getElementById('filter-active-count').innerText = working.length;
+
+      if (working.length === 0) {
+        activeBar.innerHTML = `<span class="text-slate-500 text-xs italic">All engineers currently idle or reviewing</span>`;
+      } else {
+        working.forEach(ag => {
+          const pill = document.createElement('span');
+          pill.className = 'px-2 py-0.5 rounded-full bg-slate-800 border border-emerald-500/40 text-slate-200 text-xs flex items-center gap-1.5 shadow-sm';
+          pill.innerHTML = `<span>${ag.avatar}</span> <b>${ag.name}</b>: <span class="text-emerald-400 font-bold">${ag.currentAction || ag.tool}</span>`;
+          activeBar.appendChild(pill);
+        });
+      }
+
+      // 2. Update HUD if selected agent exists
+      if (selectedAgent) {
+        document.getElementById('hud-avatar').innerText = selectedAgent.avatar;
+        document.getElementById('hud-name').innerText = selectedAgent.name;
+        document.getElementById('hud-role').innerText = selectedAgent.role;
+        document.getElementById('hud-task').innerText = `"${selectedAgent.thought || selectedAgent.currentAction || 'At station'}"`;
+        document.getElementById('hud-files').innerText = `${selectedAgent.files ? selectedAgent.files.length : 0} files`;
+        document.getElementById('hud-tools').innerText = `${selectedAgent.toolCount || 0} calls`;
+        document.getElementById('hud-tool-tag').innerText = `tool: ${selectedAgent.tool || 'ready'}`;
+
+        const badge = document.getElementById('hud-status-badge');
+        if (selectedAgent.isWorking) {
+          badge.className = 'text-[10px] px-2 py-0.5 rounded-full font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 animate-pulse';
+          badge.innerText = '● WORKING';
+        } else if (selectedAgent.status === 'completed') {
+          badge.className = 'text-[10px] px-2 py-0.5 rounded-full font-mono font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30';
+          badge.innerText = '✓ DONE';
+        } else {
+          badge.className = 'text-[10px] px-2 py-0.5 rounded-full font-mono font-bold bg-slate-700/40 text-slate-400 border border-slate-700';
+          badge.innerText = '💤 IDLE';
+        }
+      }
+
+      renderSquadCards();
+    }
+
+    function selectAgent(ag) {
+      selectedAgent = ag;
+      sound.playChime();
+      // 5. Clean up guest subagents: only keep the 7 core specialists and actively working guests
+      const liveSubIds = new Set(liveSubagents.map(s => s.id));
+      agents = agents.filter(ag => {
+        if (ag.id.startsWith('claude') || DEDICATED_DESKS[ag.name]) {
+          return true; // Keep permanent squad members
+        }
+        // Guest contractor: keep only if still reported as actively working or celebrating
+        return liveSubIds.has(ag.id) && (ag.isWorking || (ag.completedFlash && ag.completedFlash > 0));
+      });
+
+      document.getElementById('agent-count').innerText = agents.length;
+      updateUI();
+    }
+
+    let squadFilter = 'all';
+    function renderSquadCards() {
+      const container = document.getElementById('squad-grid');
+      container.innerHTML = '';
+
+      let list = agents;
+      if (squadFilter === 'active') list = agents.filter(a => a.isWorking);
+      else if (squadFilter === 'done') list = agents.filter(a => a.status === 'completed');
+
+      list.forEach(ag => {
+        const isSel = selectedAgent && selectedAgent.id === ag.id;
+        const card = document.createElement('div');
+        const borderColor = ag.isWorking ? 'border-emerald-500/60 shadow-emerald-500/10' : (isSel ? 'border-indigo-500' : 'border-slate-800');
+        
+        card.className = `p-3 rounded-xl bg-slate-900/90 border ${borderColor} hover:border-slate-600 transition-all cursor-pointer shadow-md flex flex-col justify-between`;
+        card.onclick = () => selectAgent(ag);
+
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between gap-1">
+              <div class="flex items-center gap-2">
+                <span class="text-xl">${ag.avatar}</span>
+                <div>
+                  <h3 class="font-bold text-xs text-slate-100 flex items-center gap-1">
+                    ${ag.name}
+                    ${ag.isPrimary ? '<span class="text-[9px] px-1 rounded bg-blue-500/20 text-blue-300 font-mono">LEAD</span>' : ''}
+                  </h3>
+                  <div class="text-[11px] text-slate-400 truncate max-w-[140px]">${ag.role}</div>
+                </div>
+              </div>
+              <span class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-full ${ag.isWorking ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 animate-pulse' : (ag.status === 'completed' ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-800 text-slate-400')}">
+                ${ag.isWorking ? '● WORKING' : (ag.status === 'completed' ? '✓ DONE' : '💤 IDLE')}
+              </span>
+            </div>
+
+            <div class="mt-2 text-[11px] font-mono text-amber-300/90 line-clamp-1 bg-slate-950/60 p-1 rounded border border-slate-800">
+              ${ag.currentAction || ag.thought || 'Stationary'}
+            </div>
+          </div>
+
+          <div class="mt-2 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[10px] font-mono text-slate-400">
+            <span>📦 ${ag.files ? ag.files.length : 0} files</span>
+            <span>🛠️ ${ag.toolCount || 0} calls</span>
+            <span class="text-slate-500">${ag.id.startsWith('claude') ? 'LEAD' : '#' + ag.id.slice(0, 5)}</span>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // Canvas click detection for agent selection
+    canvas.addEventListener('click', (e) => {
+      if (isDragging) return;
+      const rect = canvas.getBoundingClientRect();
+      const sx = e.clientX - rect.left;
+      const sy = e.clientY - rect.top;
+
+      let closest = null;
+      let minDist = 48 * zoom;
+
+      agents.forEach(ag => {
+        const p = isoToScreen(ag.currentPos.x, ag.currentPos.y, 0);
+        const dist = Math.hypot(p.x - sx, p.y - sy);
+        if (dist < minDist) {
+          minDist = dist;
+          closest = ag;
+        }
+      });
+
+      if (closest) selectAgent(closest);
+    });
+
+    // Interactive Button Actions
+    document.getElementById('btn-coffee').onclick = () => {
+      agents.forEach((ag, idx) => {
+        setTimeout(() => {
+          ag.targetPos = { x: POIS.coffeeMachine.x + (idx % 3) * 0.4, y: POIS.coffeeMachine.y + Math.floor(idx / 3) * 0.4 };
+          ag.state = 'coffee';
+          ag.isWorking = false;
+          ag.currentAction = 'Espresso Break';
+          ag.thought = 'Enjoying espresso in the lounge!';
+        }, idx * 120);
+
+        setTimeout(() => {
+          ag.targetPos = getDeskSeat(ag.desk);
+          ag.state = 'coding';
+          ag.thought = 'Refreshed! Resuming task at station.';
+          ag.currentAction = 'Resumed work';
+        }, 9000 + idx * 200);
+      });
+      logConsole(`☕ <b>Office Alert:</b> Espresso break called! Squad meeting at the café lounge.`);
+      sound.playCoffee();
+      // 5. Clean up guest subagents: only keep the 7 core specialists and actively working guests
+      const liveSubIds = new Set(liveSubagents.map(s => s.id));
+      agents = agents.filter(ag => {
+        if (ag.id.startsWith('claude') || DEDICATED_DESKS[ag.name]) {
+          return true; // Keep permanent squad members
+        }
+        // Guest contractor: keep only if still reported as actively working or celebrating
+        return liveSubIds.has(ag.id) && (ag.isWorking || (ag.completedFlash && ag.completedFlash > 0));
+      });
+
+      document.getElementById('agent-count').innerText = agents.length;
+      updateUI();
+    };
+
+    document.getElementById('btn-deploy').onclick = () => {
+      sound.playChime();
+      spawnConfetti(60);
+      agents.forEach(ag => {
+        ag.state = 'celebrating';
+        ag.thought = '🎉 Release deployed & verified!';
+      });
+      logConsole(`🚀 <b>Release:</b> All tasks verified, tested, and deployed!`);
+      // 5. Clean up guest subagents: only keep the 7 core specialists and actively working guests
+      const liveSubIds = new Set(liveSubagents.map(s => s.id));
+      agents = agents.filter(ag => {
+        if (ag.id.startsWith('claude') || DEDICATED_DESKS[ag.name]) {
+          return true; // Keep permanent squad members
+        }
+        // Guest contractor: keep only if still reported as actively working or celebrating
+        return liveSubIds.has(ag.id) && (ag.isWorking || (ag.completedFlash && ag.completedFlash > 0));
+      });
+
+      document.getElementById('agent-count').innerText = agents.length;
+      updateUI();
+    };
+
+    document.getElementById('btn-light').onclick = () => {
+      isNightMode = !isNightMode;
+      document.getElementById('light-icon').innerText = isNightMode ? '🌙' : '☀️';
+    };
+
+    document.getElementById('btn-audio').onclick = () => {
+      const active = sound.toggle();
+      document.getElementById('audio-icon').innerText = active ? '🔊' : '🔇';
+      logConsole(`🔊 8-bit Audio ${active ? 'Enabled' : 'Muted'}.`);
+    };
+
+    document.getElementById('btn-crt').onclick = () => {
+      isCRTMode = !isCRTMode;
+      document.getElementById('crt-icon').innerText = isCRTMode ? '📺' : '🖥️';
+      logConsole(`📺 Retro CRT Scanlines ${isCRTMode ? 'Enabled' : 'Disabled'}.`);
+    };
+
+    // Bubble mode toggles (Smart / Active Only / Show All)
+    function setBubbleMode(mode) {
+      bubbleMode = mode;
+      const btnSmart = document.getElementById('bubble-mode-smart');
+      const btnActive = document.getElementById('bubble-mode-active');
+      const btnAll = document.getElementById('bubble-mode-all');
+      
+      const activeClass = 'px-2 py-0.5 rounded bg-indigo-600 font-bold text-white transition-all shadow-sm';
+      const inactiveClass = 'px-2 py-0.5 rounded hover:bg-white/10 text-slate-400 transition-all';
+
+      btnSmart.className = mode === 'smart' ? activeClass : inactiveClass;
+      btnActive.className = mode === 'activeOnly' ? activeClass : inactiveClass;
+      btnAll.className = mode === 'all' ? activeClass : inactiveClass;
+    }
+
+    document.getElementById('bubble-mode-smart').onclick = () => setBubbleMode('smart');
+    document.getElementById('bubble-mode-active').onclick = () => setBubbleMode('activeOnly');
+    document.getElementById('bubble-mode-all').onclick = () => setBubbleMode('all');
+
+    // Filter tabs
+    document.getElementById('filter-all').onclick = () => { squadFilter = 'all'; updateUI(); };
+    document.getElementById('filter-active').onclick = () => { squadFilter = 'active'; updateUI(); };
+    document.getElementById('filter-done').onclick = () => { squadFilter = 'done'; updateUI(); };
+
+    // Initial Telemetry Fetch & Standing Interval
+    fetchLiveTelemetry();
+    setInterval(fetchLiveTelemetry, 2500);
+
+    // Initial UI render
+    updateUI();
+  </script>
+</body>
+</html>
