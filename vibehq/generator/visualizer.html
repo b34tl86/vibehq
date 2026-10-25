@@ -2946,11 +2946,27 @@
         document.getElementById('model-name').innerText = data.session.model || 'Claude Opus 5.5';
         claudeOrchestrator.isWorking = data.session.is_working;
         claudeOrchestrator.status = data.session.is_working ? 'working' : 'idle';
-        claudeOrchestrator.state = data.session.is_working ? 'coding' : 'thinking';
         if (!data.session.is_working) {
+          claudeOrchestrator.state = 'thinking';
           claudeOrchestrator.currentAction = 'Standing by (Lead Architect)';
           claudeOrchestrator.thought = 'Architecture verified. Orchestrator standing by.';
           claudeOrchestrator.tool = 'Idle';
+        } else {
+          claudeOrchestrator.state = 'coding';
+          claudeOrchestrator.targetPos = getDeskSeat(claudeOrchestrator.desk);
+          const recentClaudeEv = (data.recentEvents || [])
+            .slice()
+            .reverse()
+            .find(e => e.source && (e.source.includes('Claude') || e.source.includes('Orchestrator')));
+          if (recentClaudeEv) {
+            claudeOrchestrator.tool = recentClaudeEv.tool || 'Agent';
+            claudeOrchestrator.currentAction = `${recentClaudeEv.tool}: ${recentClaudeEv.detail}`.slice(0, 42);
+            claudeOrchestrator.thought = `Orchestrating squad: ${recentClaudeEv.detail}`.slice(0, 60);
+          } else {
+            claudeOrchestrator.tool = 'Orchestrating';
+            claudeOrchestrator.currentAction = 'Dispatching tasks to squad...';
+            claudeOrchestrator.thought = 'Orchestrating squad activities.';
+          }
         }
       }
 
@@ -3061,6 +3077,20 @@
             ag.currentAction = 'Handback (Verified)';
             ag.completedFlash = 120; // 4s celebration popup before compacting
             spawnConfetti(25);
+          } else if (sub.status !== 'completed') {
+            ag.state = 'coding';
+            ag.targetPos = getDeskSeat(ag.desk);
+            let actionText = '';
+            if (sub.lastTool && sub.files && sub.files.length > 0) {
+              actionText = `${sub.lastTool}: ${sub.files[0]}`;
+            } else if (sub.lastTool && sub.lastTool !== 'init') {
+              actionText = `${sub.lastTool}: ${sub.task ? sub.task.slice(0, 32) : 'active'}`;
+            } else if (sub.task && !sub.task.toLowerCase().includes('assigned subtask')) {
+              actionText = sub.task.slice(0, 34);
+            } else {
+              actionText = 'Working on task...';
+            }
+            ag.currentAction = actionText;
           }
           if (ag.state === 'coding') {
             ag.targetPos = getDeskSeat(ag.desk);
@@ -3094,11 +3124,16 @@
                     ? 'Standing by (Design System Synced)' 
                     : (ag.name === 'Archie' 
                       ? 'Standing by (Docs Synced)' 
-                      : 'Standing by at station')));
+                      : (ag.name === 'Felix'
+                        ? 'Standing by (Backend Synced)'
+                        : 'Standing by at station'))));
               ag.thought = ag.name === 'Hunter'
                 ? 'Perimeter secure. All 31 security & IDOR tests passing.'
                 : 'Workstation standing by for next task.';
               ag.tool = 'Idle';
+            } else {
+              ag.currentAction = 'Task Complete (Standing by)';
+              ag.tool = 'Done';
             }
           }
         }
