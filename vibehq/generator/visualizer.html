@@ -52,6 +52,9 @@
 
       <!-- Quick Action Buttons -->
       <div class="flex flex-wrap items-center gap-2 text-xs font-mono">
+        <button id="btn-lead-meet-team" class="px-3 py-1.5 rounded-lg bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 border border-indigo-500/40 transition-all flex items-center gap-1.5 active:scale-95 shadow-sm" title="Lead Programmer personally walks to meet & brief team members">
+          <span>👑</span> Meet Team
+        </button>
         <button id="btn-coffee" class="px-3 py-1.5 rounded-lg bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/30 transition-all flex items-center gap-1.5 active:scale-95 shadow-sm">
           <span>☕</span> Coffee Break
         </button>
@@ -131,6 +134,11 @@
             <span>📦 <span id="hud-files">6 files</span></span>
             <span>⚡ <span id="hud-tools">41 calls</span></span>
             <span id="hud-tool-tag" class="text-emerald-400 font-bold">tool: Bash</span>
+          </div>
+          <div id="hud-action-box" class="mt-2 pt-1 border-t border-slate-800 flex items-center gap-2">
+            <button id="btn-lead-brief" class="w-full py-1 px-2 rounded-lg bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-500/40 text-indigo-300 hover:text-white text-[11px] font-mono flex items-center justify-center gap-1.5 transition active:scale-95 shadow-sm">
+              <span>👑</span> Meet & Delegate Task
+            </button>
           </div>
         </div>
       </div>
@@ -1808,6 +1816,9 @@
     // --- 7. High-Detail Designer Workstations & Dynamic Specialist Displays ---
     function drawSingleDesk(desk, idx) {
       const dp = isoToScreen(desk.x, desk.y, 0);
+      const assignedAgent = agents.find(a => a.desk === desk);
+      const isWorking = assignedAgent && assignedAgent.isWorking;
+
       const isAva = desk.agentName === 'Ava' || desk.zone === 'uiStudio';
       const isHunter = desk.agentName === 'Hunter' || desk.zone === 'socLab';
       const isLead = desk.agentName === 'Claude' || desk.zone === 'executive';
@@ -1838,11 +1849,12 @@
       ctx.ellipse(dp.x, dp.y + 14 * zoom, 28 * zoom, 13 * zoom, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // 2. Hunter's Vibrant Emerald LED Underglow illumination on floor & legs
+      // 2. Hunter's Vibrant Emerald LED Underglow (Only illuminated when active)
       if (isHunter) {
+        const glowAlpha = isWorking ? 0.38 : 0.04;
         const hunterGlow = ctx.createRadialGradient(dp.x, dp.y + 10 * zoom, 4 * zoom, dp.x, dp.y + 10 * zoom, 32 * zoom);
-        hunterGlow.addColorStop(0, 'rgba(16, 185, 129, 0.38)');
-        hunterGlow.addColorStop(0.6, 'rgba(5, 150, 105, 0.18)');
+        hunterGlow.addColorStop(0, `rgba(16, 185, 129, ${glowAlpha})`);
+        hunterGlow.addColorStop(0.6, `rgba(5, 150, 105, ${glowAlpha * 0.5})`);
         hunterGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
         ctx.fillStyle = hunterGlow;
         ctx.beginPath();
@@ -1944,8 +1956,6 @@
 
       // 9. Workstation Monitors & Specialist Screen Visuals
       const monY = dp.y - 39 * zoom;
-      const assignedAgent = agents.find(a => a.desk === desk);
-      const isWorking = assignedAgent && assignedAgent.isWorking;
 
       // Heavy Die-Cast Aluminum Monitor Arm & Desk Clamp
       ctx.fillStyle = '#475569';
@@ -1961,86 +1971,111 @@
       ctx.beginPath();
       ctx.roundRect(dp.x - 17 * zoom, monY, 20 * zoom, 14 * zoom, 2 * zoom);
       ctx.fill();
-      ctx.strokeStyle = isWorking ? '#10b981' : (isAva ? '#f43f5e' : (isHunter ? '#22c55e' : '#475569'));
+      ctx.strokeStyle = isWorking ? '#10b981' : '#1e293b';
       ctx.lineWidth = 1.2 * zoom;
       ctx.stroke();
 
-      // Screen Interior Content by Specialist
-      if (isHunter) {
-        // --- HUNTER: Real-time Cascading Matrix Code Rain ---
-        ctx.fillStyle = '#02241b';
+      if (!isWorking) {
+        // --- DORMANT SYSTEM: WORKSTATION IN POWER-SAVE STANDBY ---
+        // Darkened sleep display (no animations, no code rain, no oscillating meters)
+        ctx.fillStyle = '#070b12';
         ctx.fillRect(dp.x - 16 * zoom, monY + 1 * zoom, 18 * zoom, 12 * zoom);
-        for (let col = 0; col < 4; col++) {
-          const streamY = (globalTick * 1.5 + col * 9) % (12 * zoom);
-          ctx.fillStyle = '#34d399';
-          ctx.fillRect(dp.x - 15 * zoom + col * 4.5 * zoom, monY + 1 * zoom + streamY, 2.2 * zoom, 3 * zoom);
-          ctx.fillStyle = '#10b98170';
-          ctx.fillRect(dp.x - 15 * zoom + col * 4.5 * zoom, monY + 1 * zoom + Math.max(0, streamY - 4 * zoom), 2.2 * zoom, 2 * zoom);
-        }
-      } else if (isAva) {
-        // --- AVA: Vector Design Canvas with Bezier Curve & Palette Chips ---
-        ctx.fillStyle = '#1e1b4b';
-        ctx.fillRect(dp.x - 16 * zoom, monY + 1 * zoom, 18 * zoom, 12 * zoom);
-        ctx.strokeStyle = '#f43f5e';
-        ctx.lineWidth = 1.4 * zoom;
-        ctx.beginPath();
-        ctx.moveTo(dp.x - 14 * zoom, monY + 10 * zoom);
-        ctx.quadraticCurveTo(dp.x - 7 * zoom, monY + 3 * zoom, dp.x + 1 * zoom, monY + 8 * zoom);
-        ctx.stroke();
-        ctx.fillStyle = '#38bdf8';
-        ctx.fillRect(dp.x - 14 * zoom, monY + 3 * zoom, 3 * zoom, 3 * zoom);
-        ctx.fillStyle = '#fde047';
-        ctx.fillRect(dp.x - 10 * zoom, monY + 3 * zoom, 3 * zoom, 3 * zoom);
-      } else if (isLead) {
-        // --- CLAUDE: Architectural UML Topology Graph with Pulsing Nodes ---
+
+        // Faint standby power LED at bottom
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(dp.x + 0.5 * zoom, monY + 11 * zoom, 1.5 * zoom, 1.5 * zoom);
+
+        // Dim horizontal standby scanline
         ctx.fillStyle = '#0f172a';
-        ctx.fillRect(dp.x - 16 * zoom, monY + 1 * zoom, 18 * zoom, 12 * zoom);
-        ctx.fillStyle = '#38bdf8';
-        ctx.fillRect(dp.x - 14 * zoom, monY + 4 * zoom, 4 * zoom, 3 * zoom);
-        ctx.fillStyle = '#10b981';
-        ctx.fillRect(dp.x - 5 * zoom, monY + 8 * zoom, 4 * zoom, 3 * zoom);
-        ctx.strokeStyle = '#64748b';
-        ctx.lineWidth = 1 * zoom;
-        ctx.beginPath();
-        ctx.moveTo(dp.x - 10 * zoom, monY + 5 * zoom);
-        ctx.lineTo(dp.x - 5 * zoom, monY + 9 * zoom);
-        ctx.stroke();
-      } else if (isTelecom) {
-        // --- TALLY: Audio Volume VU Meter Equalizer Bars ---
-        ctx.fillStyle = '#020617';
-        ctx.fillRect(dp.x - 16 * zoom, monY + 1 * zoom, 18 * zoom, 12 * zoom);
-        const vuColors = ['#10b981', '#34d399', '#fde047', '#ef4444'];
-        for (let bar = 0; bar < 4; bar++) {
-          const barH = 2 + Math.abs(Math.sin(globalTick * 0.15 + bar)) * 8 * zoom;
-          ctx.fillStyle = vuColors[bar % vuColors.length];
-          ctx.fillRect(dp.x - 14 * zoom + bar * 4 * zoom, monY + 12 * zoom - barH, 2.8 * zoom, barH);
-        }
-      } else if (isArchie) {
-        // --- ARCHIE: Markdown Documentation & CHANGELOG Split View ---
-        ctx.fillStyle = '#0f172a';
-        ctx.fillRect(dp.x - 16 * zoom, monY + 1 * zoom, 18 * zoom, 12 * zoom);
-        // Amber Markdown Header "# CHANGELOG"
-        ctx.fillStyle = '#f59e0b';
-        ctx.fillRect(dp.x - 14 * zoom, monY + 3 * zoom, 13 * zoom, 2 * zoom);
-        // Cyan Tag "[Unreleased]"
-        ctx.fillStyle = '#38bdf8';
-        ctx.fillRect(dp.x - 14 * zoom, monY + 6 * zoom, 8 * zoom, 1.4 * zoom);
-        // Formatted feature lines in emerald & slate
-        const docLines = ['#10b981', '#34d399', '#94a3b8'];
-        for (let dl = 0; dl < 3; dl++) {
-          const lw = 6 + ((globalTick * 1.5 + dl * 4) % 6) * zoom;
-          ctx.fillStyle = docLines[dl];
-          ctx.fillRect(dp.x - 12 * zoom, monY + 8.5 * zoom + dl * 1.8 * zoom, lw, 1.2 * zoom);
-        }
+        ctx.fillRect(dp.x - 14 * zoom, monY + 6 * zoom, 14 * zoom, 1 * zoom);
       } else {
-        // --- BULLPEN / QA: Syntax-Highlighted Code Editor ---
-        ctx.fillStyle = '#0f172a';
-        ctx.fillRect(dp.x - 16 * zoom, monY + 1 * zoom, 18 * zoom, 12 * zoom);
-        const codeColors = ['#f59e0b', '#38bdf8', '#ec4899', '#34d399', '#f8fafc'];
-        for (let line = 0; line < 4; line++) {
-          const lw = 4 + ((globalTick * 2 + line * 5) % 8) * zoom;
-          ctx.fillStyle = codeColors[(line + Math.floor(globalTick * 0.05)) % codeColors.length];
-          ctx.fillRect(dp.x - 14 * zoom, monY + 3 * zoom + line * 2.6 * zoom, lw, 1.5 * zoom);
+        // --- ACTIVE SYSTEM: VIBRANT DYNAMIC CODE & HARDWARE ANIMATION ---
+        // Monitor casts ambient screen glow onto desktop surface
+        const screenGlow = ctx.createRadialGradient(dp.x - 7 * zoom, monY + 6 * zoom, 2 * zoom, dp.x - 7 * zoom, monY + 6 * zoom, 22 * zoom);
+        const glowColor = isHunter ? 'rgba(16, 185, 129, 0.28)' : (isAva ? 'rgba(244, 63, 94, 0.24)' : 'rgba(56, 189, 248, 0.24)');
+        screenGlow.addColorStop(0, glowColor);
+        screenGlow.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = screenGlow;
+        ctx.beginPath();
+        ctx.arc(dp.x - 7 * zoom, monY + 6 * zoom, 22 * zoom, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Screen Interior Content by Specialist
+        if (isHunter) {
+          // --- HUNTER: Real-time Cascading Matrix Code Rain ---
+          ctx.fillStyle = '#02241b';
+          ctx.fillRect(dp.x - 16 * zoom, monY + 1 * zoom, 18 * zoom, 12 * zoom);
+          for (let col = 0; col < 4; col++) {
+            const streamY = (globalTick * 1.5 + col * 9) % (12 * zoom);
+            ctx.fillStyle = '#34d399';
+            ctx.fillRect(dp.x - 15 * zoom + col * 4.5 * zoom, monY + 1 * zoom + streamY, 2.2 * zoom, 3 * zoom);
+            ctx.fillStyle = '#10b98170';
+            ctx.fillRect(dp.x - 15 * zoom + col * 4.5 * zoom, monY + 1 * zoom + Math.max(0, streamY - 4 * zoom), 2.2 * zoom, 2 * zoom);
+          }
+        } else if (isAva) {
+          // --- AVA: Vector Design Canvas with Bezier Curve & Palette Chips ---
+          ctx.fillStyle = '#1e1b4b';
+          ctx.fillRect(dp.x - 16 * zoom, monY + 1 * zoom, 18 * zoom, 12 * zoom);
+          ctx.strokeStyle = '#f43f5e';
+          ctx.lineWidth = 1.4 * zoom;
+          ctx.beginPath();
+          ctx.moveTo(dp.x - 14 * zoom, monY + 10 * zoom);
+          ctx.quadraticCurveTo(dp.x - 7 * zoom, monY + 3 * zoom, dp.x + 1 * zoom, monY + 8 * zoom);
+          ctx.stroke();
+          const chipOffset = Math.sin(globalTick * 0.1) * 2 * zoom;
+          ctx.fillStyle = '#38bdf8';
+          ctx.fillRect(dp.x - 14 * zoom, monY + 3 * zoom, 3 * zoom, 3 * zoom);
+          ctx.fillStyle = '#fde047';
+          ctx.fillRect(dp.x - 10 * zoom, monY + 3 * zoom + chipOffset, 3 * zoom, 3 * zoom);
+        } else if (isLead) {
+          // --- CLAUDE: Architectural UML Topology Graph with Pulsing Nodes ---
+          ctx.fillStyle = '#0f172a';
+          ctx.fillRect(dp.x - 16 * zoom, monY + 1 * zoom, 18 * zoom, 12 * zoom);
+          const nodePulse = Math.sin(globalTick * 0.15) * 0.5 + 0.5;
+          ctx.fillStyle = '#38bdf8';
+          ctx.fillRect(dp.x - 14 * zoom, monY + 4 * zoom, 4 * zoom, 3 * zoom);
+          ctx.fillStyle = `rgba(16, 185, 129, ${0.5 + nodePulse * 0.5})`;
+          ctx.fillRect(dp.x - 5 * zoom, monY + 8 * zoom, 4 * zoom, 3 * zoom);
+          ctx.strokeStyle = '#64748b';
+          ctx.lineWidth = 1 * zoom;
+          ctx.beginPath();
+          ctx.moveTo(dp.x - 10 * zoom, monY + 5 * zoom);
+          ctx.lineTo(dp.x - 5 * zoom, monY + 9 * zoom);
+          ctx.stroke();
+        } else if (isTelecom) {
+          // --- TALLY: Audio Volume VU Meter Equalizer Bars ---
+          ctx.fillStyle = '#020617';
+          ctx.fillRect(dp.x - 16 * zoom, monY + 1 * zoom, 18 * zoom, 12 * zoom);
+          const vuColors = ['#10b981', '#34d399', '#fde047', '#ef4444'];
+          for (let bar = 0; bar < 4; bar++) {
+            const barH = 2 + Math.abs(Math.sin(globalTick * 0.15 + bar)) * 8 * zoom;
+            ctx.fillStyle = vuColors[bar % vuColors.length];
+            ctx.fillRect(dp.x - 14 * zoom + bar * 4 * zoom, monY + 12 * zoom - barH, 2.8 * zoom, barH);
+          }
+        } else if (isArchie) {
+          // --- ARCHIE: Markdown Documentation & CHANGELOG Split View ---
+          ctx.fillStyle = '#0f172a';
+          ctx.fillRect(dp.x - 16 * zoom, monY + 1 * zoom, 18 * zoom, 12 * zoom);
+          ctx.fillStyle = '#f59e0b';
+          ctx.fillRect(dp.x - 14 * zoom, monY + 3 * zoom, 13 * zoom, 2 * zoom);
+          ctx.fillStyle = '#38bdf8';
+          ctx.fillRect(dp.x - 14 * zoom, monY + 6 * zoom, 8 * zoom, 1.4 * zoom);
+          const docLines = ['#10b981', '#34d399', '#94a3b8'];
+          for (let dl = 0; dl < 3; dl++) {
+            const lw = 6 + ((globalTick * 1.5 + dl * 4) % 6) * zoom;
+            ctx.fillStyle = docLines[dl];
+            ctx.fillRect(dp.x - 12 * zoom, monY + 8.5 * zoom + dl * 1.8 * zoom, lw, 1.2 * zoom);
+          }
+        } else {
+          // --- BULLPEN / QA: Syntax-Highlighted Code Editor ---
+          ctx.fillStyle = '#0f172a';
+          ctx.fillRect(dp.x - 16 * zoom, monY + 1 * zoom, 18 * zoom, 12 * zoom);
+          const codeColors = ['#f59e0b', '#38bdf8', '#ec4899', '#34d399', '#f8fafc'];
+          for (let line = 0; line < 4; line++) {
+            const lw = 4 + ((globalTick * 2 + line * 5) % 8) * zoom;
+            ctx.fillStyle = codeColors[(line + Math.floor(globalTick * 0.05)) % codeColors.length];
+            ctx.fillRect(dp.x - 14 * zoom, monY + 3 * zoom + line * 2.6 * zoom, lw, 1.5 * zoom);
+          }
         }
       }
 
@@ -2049,14 +2084,21 @@
       ctx.beginPath();
       ctx.roundRect(dp.x + 5 * zoom, monY - 2 * zoom, 13 * zoom, 15 * zoom, 2 * zoom);
       ctx.fill();
-      ctx.strokeStyle = '#334155';
+      ctx.strokeStyle = isWorking ? '#38bdf8' : '#1e293b';
       ctx.stroke();
 
-      ctx.fillStyle = isWorking ? '#06b6d4' : '#1e293b';
-      ctx.fillRect(dp.x + 6 * zoom, monY - 1 * zoom, 11 * zoom, 13 * zoom);
-      ctx.fillStyle = '#ffffff60';
-      for (let l = 0; l < 4; l++) {
-        ctx.fillRect(dp.x + 7 * zoom, monY + 1 * zoom + l * 3 * zoom, 8 * zoom, 1.5 * zoom);
+      if (!isWorking) {
+        ctx.fillStyle = '#070b12';
+        ctx.fillRect(dp.x + 6 * zoom, monY - 1 * zoom, 11 * zoom, 13 * zoom);
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(dp.x + 10 * zoom, monY + 5 * zoom, 3 * zoom, 1 * zoom);
+      } else {
+        ctx.fillStyle = '#06b6d4';
+        ctx.fillRect(dp.x + 6 * zoom, monY - 1 * zoom, 11 * zoom, 13 * zoom);
+        ctx.fillStyle = '#ffffff60';
+        for (let l = 0; l < 4; l++) {
+          ctx.fillRect(dp.x + 7 * zoom, monY + 1 * zoom + l * 3 * zoom, 8 * zoom, 1.5 * zoom);
+        }
       }
 
       // 3. Hunter's Third SOC Monitor (Left Screen)
@@ -2065,12 +2107,19 @@
         ctx.beginPath();
         ctx.roundRect(dp.x - 30 * zoom, monY + 2 * zoom, 12 * zoom, 13 * zoom, 2 * zoom);
         ctx.fill();
-        ctx.strokeStyle = '#10b981';
+        ctx.strokeStyle = isWorking ? '#10b981' : '#1e293b';
         ctx.stroke();
-        ctx.fillStyle = '#02241b';
-        ctx.fillRect(dp.x - 29 * zoom, monY + 3 * zoom, 10 * zoom, 11 * zoom);
-        ctx.fillStyle = Math.sin(globalTick * 0.2) > 0 ? '#ef4444' : '#10b981';
-        ctx.fillRect(dp.x - 27 * zoom, monY + 5 * zoom, 6 * zoom, 2 * zoom);
+        if (!isWorking) {
+          ctx.fillStyle = '#070b12';
+          ctx.fillRect(dp.x - 29 * zoom, monY + 3 * zoom, 10 * zoom, 11 * zoom);
+          ctx.fillStyle = '#064e3b30';
+          ctx.fillRect(dp.x - 27 * zoom, monY + 8 * zoom, 4 * zoom, 1 * zoom);
+        } else {
+          ctx.fillStyle = '#02241b';
+          ctx.fillRect(dp.x - 29 * zoom, monY + 3 * zoom, 10 * zoom, 11 * zoom);
+          ctx.fillStyle = Math.sin(globalTick * 0.2) > 0 ? '#ef4444' : '#10b981';
+          ctx.fillRect(dp.x - 27 * zoom, monY + 5 * zoom, 6 * zoom, 2 * zoom);
+        }
       }
 
       // 10. Specialist Desk Gear & Accessories
@@ -2120,19 +2169,26 @@
         });
       }
 
-      // C. Victor's Mini Oscilloscope
+      // C. Victor's Mini Oscilloscope (Active sine waveform only when working)
       if (isVictor) {
         ctx.fillStyle = '#0f172a';
         ctx.fillRect(dp.x + 11 * zoom, dp.y - 26 * zoom, 10 * zoom, 8 * zoom);
-        ctx.strokeStyle = '#06b6d4';
+        ctx.strokeStyle = isWorking ? '#06b6d4' : '#1e293b';
         ctx.lineWidth = 1 * zoom;
         ctx.strokeRect(dp.x + 11 * zoom, dp.y - 26 * zoom, 10 * zoom, 8 * zoom);
-        ctx.strokeStyle = '#10b981';
+        ctx.strokeStyle = isWorking ? '#10b981' : '#1e293b';
         ctx.beginPath();
-        ctx.moveTo(dp.x + 12 * zoom, dp.y - 22 * zoom);
-        ctx.lineTo(dp.x + 14 * zoom, dp.y - 24 * zoom);
-        ctx.lineTo(dp.x + 16 * zoom, dp.y - 20 * zoom);
-        ctx.lineTo(dp.x + 19 * zoom, dp.y - 22 * zoom);
+        if (isWorking) {
+          const oscOffset = Math.sin(globalTick * 0.3) * 2 * zoom;
+          ctx.moveTo(dp.x + 12 * zoom, dp.y - 22 * zoom);
+          ctx.lineTo(dp.x + 14 * zoom, dp.y - 24 * zoom + oscOffset);
+          ctx.lineTo(dp.x + 16 * zoom, dp.y - 20 * zoom - oscOffset);
+          ctx.lineTo(dp.x + 19 * zoom, dp.y - 22 * zoom);
+        } else {
+          // Dormant flatline baseline
+          ctx.moveTo(dp.x + 12 * zoom, dp.y - 22 * zoom);
+          ctx.lineTo(dp.x + 19 * zoom, dp.y - 22 * zoom);
+        }
         ctx.stroke();
       }
 
@@ -2155,14 +2211,18 @@
         ctx.fillRect(dp.x + 12 * zoom, dp.y - 25.5 * zoom, 8 * zoom, 2 * zoom);
       }
 
-      // 11. Custom Backlit Mechanical Keyboard & Ceramic Coffee Mug
+      // 11. Custom Backlit Mechanical Keyboard (Only illuminated RGB when working)
       ctx.fillStyle = '#1e293b';
       ctx.fillRect(dp.x - 8 * zoom, dp.y - 18 * zoom, 12 * zoom, 5 * zoom);
-      const rgbColor = isWorking 
-        ? '#34d399' 
-        : ['#ec4899', '#8b5cf6', '#3b82f6', '#10b981'][Math.floor((globalTick * 0.05) % 4)];
-      ctx.fillStyle = rgbColor;
-      ctx.fillRect(dp.x - 7 * zoom, dp.y - 17 * zoom, 10 * zoom, 3 * zoom);
+      if (isWorking) {
+        const rgbColor = ['#34d399', '#38bdf8', '#818cf8', '#f43f5e'][Math.floor((globalTick * 0.08) % 4)];
+        ctx.fillStyle = rgbColor;
+        ctx.fillRect(dp.x - 7 * zoom, dp.y - 17 * zoom, 10 * zoom, 3 * zoom);
+      } else {
+        // Dormant matte keycaps
+        ctx.fillStyle = '#334155';
+        ctx.fillRect(dp.x - 7 * zoom, dp.y - 17 * zoom, 10 * zoom, 3 * zoom);
+      }
 
       // Ceramic Coffee Mug with Steam & Handle
       ctx.fillStyle = '#f8fafc';
@@ -2193,7 +2253,7 @@
         if (agent.state === 'walking') {
           const seat = getDeskSeat(agent.desk);
           agent.state = (Math.hypot(agent.currentPos.x - seat.x, agent.currentPos.y - seat.y) < 0.1) 
-            ? 'coding' 
+            ? (agent.isWorking ? 'coding' : 'thinking') 
             : 'thinking';
         }
       }
@@ -2232,10 +2292,10 @@
         ctx.stroke();
       }
 
-      // Natural Breathing & Typing Bobs
+      // Natural Breathing & Typing Bobs (Only bob hands & typing if actively working)
       const walkBob = (agent.state === 'walking') ? Math.sin(globalTick * 0.4 * simSpeed) * 2.5 * zoom : 0;
       const breatheBob = (agent.state !== 'walking') ? Math.sin(globalTick * 0.08) * 0.7 * zoom : 0;
-      const typeBob = (agent.state === 'coding') ? Math.sin(globalTick * 0.25 * simSpeed) * 0.8 * zoom : 0;
+      const typeBob = (agent.state === 'coding' && agent.isWorking) ? Math.sin(globalTick * 0.25 * simSpeed) * 0.8 * zoom : 0;
       const cy = p.y - 14 * zoom + walkBob + breatheBob + typeBob;
 
       // Legs & Footwear
@@ -2353,15 +2413,39 @@
         ctx.stroke();
       }
 
-      // Hands Typing Motion on Keyboard
+      // Hands Typing Motion on Keyboard (Only moves when actively working)
       if (agent.state === 'coding') {
         ctx.fillStyle = '#fcd34d';
-        const speedFactor = agent.isWorking ? 0.7 : 0.3;
-        const handOffset = (Math.sin(globalTick * speedFactor) > 0) ? 1.5 * zoom : -1.5 * zoom;
-        ctx.fillRect(p.x - 5 * zoom, cy + 4 * zoom + handOffset, 3 * zoom, 3 * zoom);
-        ctx.fillRect(p.x + 2 * zoom, cy + 4 * zoom - handOffset, 3 * zoom, 3 * zoom);
-        if (agent.isWorking && globalTick % 12 === 0 && Math.random() < 0.25) {
-          sound.playTyping();
+        if (agent.isWorking) {
+          const speedFactor = 0.7;
+          const handOffset = (Math.sin(globalTick * speedFactor) > 0) ? 1.5 * zoom : -1.5 * zoom;
+          ctx.fillRect(p.x - 5 * zoom, cy + 4 * zoom + handOffset, 3 * zoom, 3 * zoom);
+          ctx.fillRect(p.x + 2 * zoom, cy + 4 * zoom - handOffset, 3 * zoom, 3 * zoom);
+          if (globalTick % 12 === 0 && Math.random() < 0.25) {
+            sound.playTyping();
+          }
+        } else {
+          // Stationary resting hands on desk
+          ctx.fillRect(p.x - 5 * zoom, cy + 4 * zoom, 3 * zoom, 2 * zoom);
+          ctx.fillRect(p.x + 2 * zoom, cy + 4 * zoom, 3 * zoom, 2 * zoom);
+        }
+      } else if (agent.state === 'briefing') {
+        if (agent.isPrimary) {
+          // Claude holding holographic briefing tablet with task specs
+          ctx.fillStyle = '#1e293b';
+          ctx.fillRect(p.x + 3 * zoom, cy - 3 * zoom, 7 * zoom, 9 * zoom);
+          ctx.strokeStyle = '#38bdf8';
+          ctx.lineWidth = 1 * zoom;
+          ctx.strokeRect(p.x + 3 * zoom, cy - 3 * zoom, 7 * zoom, 9 * zoom);
+          // Holographic task blueprint lines
+          ctx.fillStyle = '#38bdf8';
+          ctx.fillRect(p.x + 4.5 * zoom, cy - 1.5 * zoom, 4 * zoom, 1 * zoom);
+          ctx.fillRect(p.x + 4.5 * zoom, cy + 0.5 * zoom, 4 * zoom, 1 * zoom);
+          ctx.fillRect(p.x + 4.5 * zoom, cy + 2.5 * zoom, 3 * zoom, 1 * zoom);
+        } else {
+          // Attentive listening posture / hands attentive
+          ctx.fillStyle = '#fcd34d';
+          ctx.fillRect(p.x - 3 * zoom, cy + 3 * zoom, 6 * zoom, 2 * zoom);
         }
       }
 
@@ -2385,24 +2469,34 @@
         if (bubbleMode === 'all') {
           showFullBubble = true;
         } else if (bubbleMode === 'activeOnly') {
-          showFullBubble = isWorking || isSelected || isHovered;
+          showFullBubble = isWorking || isSelected || isHovered || (agent.state === 'briefing');
         } else {
-          // 'smart' mode (default): full bubble for active workers, selected, hovered, or freshly completed
-          showFullBubble = isWorking || isSelected || isHovered || isRecentDone;
+          // 'smart' mode (default): full bubble for active workers, selected, hovered, freshly completed, or during task briefing
+          showFullBubble = isWorking || isSelected || isHovered || isRecentDone || (agent.state === 'briefing');
         }
 
         if (showFullBubble) {
           // --- FULL COMIC SPEECH BUBBLE ---
-          let icon = isWorking ? '⚡' : (agent.status === 'completed' ? '✓' : '💤');
-          let statusColor = isWorking ? '#34d399' : (agent.status === 'completed' ? '#38bdf8' : '#94a3b8');
-          let borderColor = isSelected ? '#ffffff' : (isWorking ? '#10b981' : (agent.color || '#475569'));
+          let icon = (agent.state === 'briefing') 
+            ? (agent.isPrimary ? '👑' : '📋') 
+            : (isWorking ? '⚡' : (agent.status === 'completed' ? '✓' : '💤'));
+          let statusColor = (agent.state === 'briefing')
+            ? '#38bdf8' 
+            : (isWorking ? '#34d399' : (agent.status === 'completed' ? '#38bdf8' : '#94a3b8'));
+          let borderColor = isSelected 
+            ? '#ffffff' 
+            : (agent.state === 'briefing' ? '#38bdf8' : (isWorking ? '#10b981' : (agent.color || '#475569')));
           
-          let toolName = agent.tool || (isWorking ? 'Working' : (agent.status === 'completed' ? 'Done' : 'Idle'));
+          let toolName = (agent.state === 'briefing')
+            ? (agent.isPrimary ? 'Delegating' : 'Briefing')
+            : (agent.tool || (isWorking ? 'Working' : (agent.status === 'completed' ? 'Done' : 'Idle')));
           if (toolName === 'SubagentHandback') toolName = 'Verified';
           const headerTitle = `${agent.name}`;
 
           let subtitle = '';
-          if (isWorking) {
+          if (agent.state === 'briefing') {
+            subtitle = agent.currentAction || 'Briefing with Lead...';
+          } else if (isWorking) {
             if (agent.currentAction) {
               subtitle = agent.currentAction;
             } else if (agent.files && agent.files.length > 0) {
@@ -2762,6 +2856,127 @@
       ctx.fillRect(0, 0, w, h);
     }
 
+    // --- Lead Programmer Task Delegation & Personal Meeting System ---
+    let meetingQueue = [];
+    let currentMeeting = null;
+
+    function dispatchLeadToMeet(agent, taskDetail) {
+      if (!agent || agent.id === 'claude-lead' || agent.id.startsWith('claude')) return;
+      if (currentMeeting && currentMeeting.agent.id === agent.id) return;
+      if (meetingQueue.some(m => m.agent.id === agent.id)) return;
+
+      meetingQueue.push({
+        agent: agent,
+        taskDetail: taskDetail || agent.thought || 'Next Milestone Sprint Task',
+        stage: 'queued',
+        timer: 0
+      });
+      logConsole(`👑 <b>Lead Architect:</b> Scheduled in-person task briefing with <b>${agent.name}</b>.`);
+    }
+
+    function updateLeadMeeting() {
+      if (!currentMeeting) {
+        if (meetingQueue.length > 0) {
+          currentMeeting = meetingQueue.shift();
+          currentMeeting.stage = 'walking_to';
+          currentMeeting.timer = 0;
+
+          // Target consultation spot standing in front of the specialist's desk
+          const consultSpot = {
+            x: currentMeeting.agent.desk.x + 0.65,
+            y: currentMeeting.agent.desk.y + 0.35
+          };
+          claudeOrchestrator.targetPos = consultSpot;
+          claudeOrchestrator.state = 'walking';
+          claudeOrchestrator.isWorking = true;
+          claudeOrchestrator.meetingWith = currentMeeting.agent;
+          claudeOrchestrator.currentAction = `Meeting ${currentMeeting.agent.name} at station`;
+          claudeOrchestrator.thought = `Briefing ${currentMeeting.agent.name}: "${currentMeeting.taskDetail.slice(0, 32)}..."`;
+
+          logConsole(`👑 <b>Lead Architect:</b> Stepping out of Executive Suite to personally meet <b>${currentMeeting.agent.name}</b>.`);
+        }
+        return;
+      }
+
+      const dist = Math.hypot(
+        claudeOrchestrator.currentPos.x - claudeOrchestrator.targetPos.x,
+        claudeOrchestrator.currentPos.y - claudeOrchestrator.targetPos.y
+      );
+
+      if (currentMeeting.stage === 'walking_to') {
+        if (dist < 0.1) {
+          // Arrived at the desk! Begin in-person briefing
+          currentMeeting.stage = 'briefing';
+          currentMeeting.timer = 180; // ~3s consultation
+          claudeOrchestrator.state = 'briefing';
+          claudeOrchestrator.currentAction = `Briefing ${currentMeeting.agent.name}`;
+          claudeOrchestrator.thought = `Briefing ${currentMeeting.agent.name}: "${currentMeeting.taskDetail.slice(0, 36)}"`;
+
+          currentMeeting.agent.state = 'briefing';
+          currentMeeting.agent.currentAction = `Receiving Task from Claude`;
+          currentMeeting.agent.thought = `Briefed by Claude: "${currentMeeting.taskDetail.slice(0, 36)}"`;
+
+          sound.playClick();
+          logConsole(`📋 <b>Task Handoff:</b> Claude personally briefing <b>${currentMeeting.agent.name}</b> on "${escapeHtml(currentMeeting.taskDetail.slice(0, 48))}".`);
+        }
+      } else if (currentMeeting.stage === 'briefing') {
+        currentMeeting.timer -= 1 * simSpeed;
+
+        // Visual task handoff blueprint sparks
+        if (Math.floor(currentMeeting.timer) % 20 === 0) {
+          const p1 = isoToScreen(claudeOrchestrator.currentPos.x, claudeOrchestrator.currentPos.y, 14);
+          const p2 = isoToScreen(currentMeeting.agent.currentPos.x, currentMeeting.agent.currentPos.y, 14);
+          particles.push({
+            x: (p1.x + p2.x) / 2 + (Math.random() - 0.5) * 8 * zoom,
+            y: (p1.y + p2.y) / 2 + (Math.random() - 0.5) * 8 * zoom,
+            vx: (Math.random() - 0.5) * 1.5,
+            vy: -1.2 - Math.random() * 1.5,
+            color: '#38bdf8',
+            size: 2.5 * zoom,
+            life: 0.8,
+            isConfetti: false,
+          });
+        }
+
+        if (currentMeeting.timer <= 0) {
+          // Finish briefing, specialist activates systems, Claude walks back to his office
+          currentMeeting.stage = 'walking_back';
+
+          const targetAgent = currentMeeting.agent;
+          targetAgent.isWorking = true;
+          targetAgent.status = 'working';
+          targetAgent.state = 'coding';
+          targetAgent.targetPos = getDeskSeat(targetAgent.desk);
+
+          let actionText = '';
+          if (targetAgent.tool && targetAgent.tool !== 'init' && targetAgent.tool !== 'Idle') {
+            actionText = `${targetAgent.tool}: active`;
+          } else {
+            actionText = currentMeeting.taskDetail.slice(0, 32);
+          }
+          targetAgent.currentAction = actionText;
+          targetAgent.thought = currentMeeting.taskDetail;
+
+          claudeOrchestrator.targetPos = getDeskSeat(claudeOrchestrator.desk);
+          claudeOrchestrator.state = 'walking';
+          claudeOrchestrator.currentAction = `Returning to Executive Suite`;
+          claudeOrchestrator.thought = `Briefed ${targetAgent.name}. Returning to oversee squad.`;
+
+          sound.playTyping();
+          logConsole(`⚡ <b>${targetAgent.name}</b> initialized station and began execution.`);
+        }
+      } else if (currentMeeting.stage === 'walking_back') {
+        if (dist < 0.1) {
+          // Claude is safely back at his Executive desk
+          claudeOrchestrator.state = 'coding';
+          claudeOrchestrator.meetingWith = null;
+          claudeOrchestrator.currentAction = 'Orchestrating squad activities';
+          claudeOrchestrator.thought = 'Architecture verified. Orchestrator overseeing squad.';
+          currentMeeting = null;
+        }
+      }
+    }
+
     // --- Main Game Loop ---
     function renderLoop() {
       if (!isPaused) {
@@ -2772,6 +2987,7 @@
           ag.completedFlash -= 1 * simSpeed;
         }
       });
+      updateLeadMeeting();
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       renderOfficeFloor();
       renderRoomFixtures();
@@ -3098,6 +3314,20 @@
         }
       });
 
+      // 3.5. Trigger Lead Programmer in-person task briefing on newly detected subagent assignment
+      liveSubagents.forEach(sub => {
+        if (sub.status !== 'completed' && sub.is_working !== false) {
+          const ag = agents.find(a => a.name.toLowerCase() === sub.name.toLowerCase() || a.id === sub.id);
+          if (ag) {
+            if (!ag.briefedSubIds) ag.briefedSubIds = new Set();
+            if (!ag.briefedSubIds.has(sub.id)) {
+              ag.briefedSubIds.add(sub.id);
+              dispatchLeadToMeet(ag, sub.task || sub.role || 'Sprint Task Execution');
+            }
+          }
+        }
+      });
+
       // 4. Reconcile core specialists with live session telemetry:
       // If a dedicated core specialist is NOT currently running an active subagent task,
       // transition them into idle / completed standing by state so they do not stay stuck working.
@@ -3206,6 +3436,20 @@
           badge.className = 'text-[10px] px-2 py-0.5 rounded-full font-mono font-bold bg-slate-700/40 text-slate-400 border border-slate-700';
           badge.innerText = '💤 IDLE';
         }
+
+        const hudBriefBtn = document.getElementById('btn-lead-brief');
+        if (hudBriefBtn) {
+          if (selectedAgent && selectedAgent.id !== 'claude-lead' && !selectedAgent.id.startsWith('claude')) {
+            hudBriefBtn.style.display = 'flex';
+            hudBriefBtn.innerHTML = `<span>👑</span> Meet & Brief ${selectedAgent.name}`;
+            hudBriefBtn.onclick = (e) => {
+              e.stopPropagation();
+              dispatchLeadToMeet(selectedAgent, selectedAgent.thought || selectedAgent.role || 'Milestone Sprint Task');
+            };
+          } else {
+            hudBriefBtn.style.display = 'none';
+          }
+        }
       }
 
       renderSquadCards();
@@ -3214,17 +3458,6 @@
     function selectAgent(ag) {
       selectedAgent = ag;
       sound.playChime();
-      // 5. Clean up guest subagents: only keep the 7 core specialists and actively working guests
-      const liveSubIds = new Set(liveSubagents.map(s => s.id));
-      agents = agents.filter(ag => {
-        if (ag.id.startsWith('claude') || DEDICATED_DESKS[ag.name]) {
-          return true; // Keep permanent squad members
-        }
-        // Guest contractor: keep only if still reported as actively working or celebrating
-        return liveSubIds.has(ag.id) && (ag.isWorking || (ag.completedFlash && ag.completedFlash > 0));
-      });
-
-      document.getElementById('agent-count').innerText = agents.length;
       updateUI();
     }
 
@@ -3301,6 +3534,22 @@
     });
 
     // Interactive Button Actions
+    const btnLeadMeet = document.getElementById('btn-lead-meet-team');
+    if (btnLeadMeet) {
+      btnLeadMeet.onclick = () => {
+        let target = null;
+        if (selectedAgent && selectedAgent.id !== 'claude-lead' && !selectedAgent.id.startsWith('claude')) {
+          target = selectedAgent;
+        } else {
+          const nonClaude = agents.filter(a => a.id !== 'claude-lead' && !a.id.startsWith('claude'));
+          target = nonClaude.find(a => a.isWorking) || nonClaude[0];
+        }
+        if (target) {
+          dispatchLeadToMeet(target, target.thought || target.role || 'Sprint Milestone Task');
+        }
+      };
+    }
+
     document.getElementById('btn-coffee').onclick = () => {
       agents.forEach((ag, idx) => {
         setTimeout(() => {
@@ -3320,17 +3569,6 @@
       });
       logConsole(`☕ <b>Office Alert:</b> Espresso break called! Squad meeting at the café lounge.`);
       sound.playCoffee();
-      // 5. Clean up guest subagents: only keep the 7 core specialists and actively working guests
-      const liveSubIds = new Set(liveSubagents.map(s => s.id));
-      agents = agents.filter(ag => {
-        if (ag.id.startsWith('claude') || DEDICATED_DESKS[ag.name]) {
-          return true; // Keep permanent squad members
-        }
-        // Guest contractor: keep only if still reported as actively working or celebrating
-        return liveSubIds.has(ag.id) && (ag.isWorking || (ag.completedFlash && ag.completedFlash > 0));
-      });
-
-      document.getElementById('agent-count').innerText = agents.length;
       updateUI();
     };
 
@@ -3342,17 +3580,6 @@
         ag.thought = '🎉 Release deployed & verified!';
       });
       logConsole(`🚀 <b>Release:</b> All tasks verified, tested, and deployed!`);
-      // 5. Clean up guest subagents: only keep the 7 core specialists and actively working guests
-      const liveSubIds = new Set(liveSubagents.map(s => s.id));
-      agents = agents.filter(ag => {
-        if (ag.id.startsWith('claude') || DEDICATED_DESKS[ag.name]) {
-          return true; // Keep permanent squad members
-        }
-        // Guest contractor: keep only if still reported as actively working or celebrating
-        return liveSubIds.has(ag.id) && (ag.isWorking || (ag.completedFlash && ag.completedFlash > 0));
-      });
-
-      document.getElementById('agent-count').innerText = agents.length;
       updateUI();
     };
 
@@ -3396,6 +3623,39 @@
     document.getElementById('filter-all').onclick = () => { squadFilter = 'all'; updateUI(); };
     document.getElementById('filter-active').onclick = () => { squadFilter = 'active'; updateUI(); };
     document.getElementById('filter-done').onclick = () => { squadFilter = 'done'; updateUI(); };
+
+    // Direct URL Deeplink & Hash Actions (e.g. #meet-hunter, #meet-felix)
+    if (window.location.hash) {
+      const hash = window.location.hash.toLowerCase();
+      if (hash.includes('meet')) {
+        let targetName = 'Hunter';
+        if (hash.includes('felix')) targetName = 'Felix';
+        else if (hash.includes('ava')) targetName = 'Ava';
+        else if (hash.includes('victor')) targetName = 'Victor';
+        else if (hash.includes('archie')) targetName = 'Archie';
+        else if (hash.includes('tally')) targetName = 'Tally';
+        
+        const target = agents.find(a => a.name.toLowerCase() === targetName.toLowerCase());
+        if (target) {
+          if (hash.includes('briefing')) {
+            // Immediate briefing showcase state
+            const consultSpot = { x: target.desk.x + 0.65, y: target.desk.y + 0.35 };
+            claudeOrchestrator.currentPos = consultSpot;
+            claudeOrchestrator.targetPos = consultSpot;
+            claudeOrchestrator.state = 'briefing';
+            claudeOrchestrator.isWorking = true;
+            claudeOrchestrator.currentAction = `Briefing ${target.name}`;
+            claudeOrchestrator.thought = `Briefing ${target.name}: "Audit IDOR vulnerabilities & endpoints"`;
+            target.state = 'briefing';
+            target.currentAction = `Receiving Task from Claude`;
+            target.thought = `Briefed by Claude: "Audit IDOR vulnerabilities & endpoints"`;
+            currentMeeting = { agent: target, taskDetail: 'Audit IDOR vulnerabilities & endpoints', stage: 'briefing', timer: 180 };
+          } else {
+            dispatchLeadToMeet(target, `Sprint Milestone: Lead Architect in-person briefing`);
+          }
+        }
+      }
+    }
 
     // Initial Telemetry Fetch & Standing Interval
     fetchLiveTelemetry();
