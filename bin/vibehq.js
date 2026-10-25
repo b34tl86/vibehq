@@ -30,3 +30,4 @@ proc.on('error', (err) => {
 proc.on('exit', (code) => {
   process.exit(code || 0);
 });
+

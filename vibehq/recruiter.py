@@ -131,3 +131,4 @@ class SquadRecruiter:
             written[fname] = dest
 
         return written
+

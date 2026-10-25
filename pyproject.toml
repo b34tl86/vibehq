@@ -35,3 +35,4 @@ vibehq = [
     "templates/*.md",
     "generator/*.html",
 ]
+

@@ -171,3 +171,4 @@ class ClaudeCodeAdapter:
             state["metrics"]["activeSubagents"] = active_count
 
         return state
+

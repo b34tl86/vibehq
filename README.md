@@ -101,3 +101,4 @@ vibehq/
 
 ## 📜 License
 MIT License. Created for the Vibe Coding community.
+

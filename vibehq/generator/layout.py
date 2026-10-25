@@ -140,3 +140,4 @@ class ProceduralLayoutGenerator:
                 "defaultZoom": 1.0 if count >= 6 else 1.25,
             },
         }
+

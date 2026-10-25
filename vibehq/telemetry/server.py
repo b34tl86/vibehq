@@ -81,3 +81,4 @@ def create_app(repo_root: Path | None = None) -> FastAPI:
         return "<h1>VibeHQ Visualizer Template Not Found</h1>"
 
     return app
+

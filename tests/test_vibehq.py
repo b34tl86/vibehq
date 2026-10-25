@@ -126,3 +126,4 @@ def test_server_api_endpoints():
     res_html = client.get("/")
     assert res_html.status_code == 200
     assert "<canvas" in res_html.text or "viewport" in res_html.text
+
