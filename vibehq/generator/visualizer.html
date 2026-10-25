@@ -1818,6 +1818,11 @@
       const dp = isoToScreen(desk.x, desk.y, 0);
       const assignedAgent = agents.find(a => a.desk === desk);
       const isWorking = assignedAgent && assignedAgent.isWorking;
+      const isCompleted = assignedAgent && (
+        assignedAgent.status === 'completed' || 
+        assignedAgent.recentlyCompleted || 
+        (assignedAgent.completedAt && (Date.now() - assignedAgent.completedAt < 600000))
+      );
 
       const isAva = desk.agentName === 'Ava' || desk.zone === 'uiStudio';
       const isHunter = desk.agentName === 'Hunter' || desk.zone === 'socLab';
@@ -1971,24 +1976,11 @@
       ctx.beginPath();
       ctx.roundRect(dp.x - 17 * zoom, monY, 20 * zoom, 14 * zoom, 2 * zoom);
       ctx.fill();
-      ctx.strokeStyle = isWorking ? '#10b981' : '#1e293b';
+      ctx.strokeStyle = isWorking ? '#10b981' : (isCompleted ? '#059669' : '#334155');
       ctx.lineWidth = 1.2 * zoom;
       ctx.stroke();
 
-      if (!isWorking) {
-        // --- DORMANT SYSTEM: WORKSTATION IN POWER-SAVE STANDBY ---
-        // Darkened sleep display (no animations, no code rain, no oscillating meters)
-        ctx.fillStyle = '#070b12';
-        ctx.fillRect(dp.x - 16 * zoom, monY + 1 * zoom, 18 * zoom, 12 * zoom);
-
-        // Faint standby power LED at bottom
-        ctx.fillStyle = '#1e293b';
-        ctx.fillRect(dp.x + 0.5 * zoom, monY + 11 * zoom, 1.5 * zoom, 1.5 * zoom);
-
-        // Dim horizontal standby scanline
-        ctx.fillStyle = '#0f172a';
-        ctx.fillRect(dp.x - 14 * zoom, monY + 6 * zoom, 14 * zoom, 1 * zoom);
-      } else {
+      if (isWorking) {
         // --- ACTIVE SYSTEM: VIBRANT DYNAMIC CODE & HARDWARE ANIMATION ---
         // Monitor casts ambient screen glow onto desktop surface
         const screenGlow = ctx.createRadialGradient(dp.x - 7 * zoom, monY + 6 * zoom, 2 * zoom, dp.x - 7 * zoom, monY + 6 * zoom, 22 * zoom);
@@ -2077,6 +2069,55 @@
             ctx.fillRect(dp.x - 14 * zoom, monY + 3 * zoom + line * 2.6 * zoom, lw, 1.5 * zoom);
           }
         }
+      } else if (isCompleted) {
+        // --- COMPLETED SYSTEM: POST-SPRINT VERIFICATION & DIFF REVIEW ---
+        const screenGlow = ctx.createRadialGradient(dp.x - 7 * zoom, monY + 6 * zoom, 2 * zoom, dp.x - 7 * zoom, monY + 6 * zoom, 20 * zoom);
+        screenGlow.addColorStop(0, 'rgba(16, 185, 129, 0.22)');
+        screenGlow.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = screenGlow;
+        ctx.beginPath();
+        ctx.arc(dp.x - 7 * zoom, monY + 6 * zoom, 20 * zoom, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Terminal background
+        ctx.fillStyle = '#052219';
+        ctx.fillRect(dp.x - 16 * zoom, monY + 1 * zoom, 18 * zoom, 12 * zoom);
+
+        // Green verification banner & checkmark
+        ctx.fillStyle = '#10b981';
+        ctx.fillRect(dp.x - 15 * zoom, monY + 2.5 * zoom, 16 * zoom, 2.2 * zoom);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(dp.x - 14 * zoom, monY + 3 * zoom, 2 * zoom, 1.2 * zoom);
+        ctx.fillRect(dp.x - 11 * zoom, monY + 3 * zoom, 9 * zoom, 1.2 * zoom);
+
+        // Tool pass stats & diff lines
+        ctx.fillStyle = '#34d399';
+        ctx.fillRect(dp.x - 14 * zoom, monY + 6 * zoom, 13 * zoom, 1.5 * zoom);
+        ctx.fillStyle = '#6ee7b7';
+        ctx.fillRect(dp.x - 14 * zoom, monY + 8.5 * zoom, 9 * zoom, 1.2 * zoom);
+
+        // Blinking green prompt cursor
+        if (Math.sin(globalTick * 0.1) > 0) {
+          ctx.fillStyle = '#10b981';
+          ctx.fillRect(dp.x - 4 * zoom, monY + 8.5 * zoom, 1.8 * zoom, 1.2 * zoom);
+        }
+      } else {
+        // --- STANDBY SYSTEM: SLEEK POWER-SAVE SCREENSAVER (READY STATE) ---
+        ctx.fillStyle = '#0b1120';
+        ctx.fillRect(dp.x - 16 * zoom, monY + 1 * zoom, 18 * zoom, 12 * zoom);
+
+        // Gentle pulsing cyan status dot [READY]
+        const pulse = Math.sin(globalTick * 0.08) * 0.35 + 0.65;
+        ctx.fillStyle = `rgba(56, 189, 248, ${pulse})`;
+        ctx.beginPath();
+        ctx.arc(dp.x - 7 * zoom, monY + 7 * zoom, 2 * zoom, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Standby horizontal scanline & power LED
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(dp.x - 14 * zoom, monY + 10 * zoom, 14 * zoom, 1 * zoom);
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillRect(dp.x + 0.5 * zoom, monY + 11.5 * zoom, 1.2 * zoom, 1.2 * zoom);
       }
 
       // 2. Secondary Display (Right Screen)
@@ -2084,21 +2125,29 @@
       ctx.beginPath();
       ctx.roundRect(dp.x + 5 * zoom, monY - 2 * zoom, 13 * zoom, 15 * zoom, 2 * zoom);
       ctx.fill();
-      ctx.strokeStyle = isWorking ? '#38bdf8' : '#1e293b';
+      ctx.strokeStyle = isWorking ? '#38bdf8' : (isCompleted ? '#10b981' : '#1e293b');
       ctx.stroke();
 
-      if (!isWorking) {
-        ctx.fillStyle = '#070b12';
-        ctx.fillRect(dp.x + 6 * zoom, monY - 1 * zoom, 11 * zoom, 13 * zoom);
-        ctx.fillStyle = '#1e293b';
-        ctx.fillRect(dp.x + 10 * zoom, monY + 5 * zoom, 3 * zoom, 1 * zoom);
-      } else {
+      if (isWorking) {
         ctx.fillStyle = '#06b6d4';
         ctx.fillRect(dp.x + 6 * zoom, monY - 1 * zoom, 11 * zoom, 13 * zoom);
         ctx.fillStyle = '#ffffff60';
         for (let l = 0; l < 4; l++) {
           ctx.fillRect(dp.x + 7 * zoom, monY + 1 * zoom + l * 3 * zoom, 8 * zoom, 1.5 * zoom);
         }
+      } else if (isCompleted) {
+        ctx.fillStyle = '#062d22';
+        ctx.fillRect(dp.x + 6 * zoom, monY - 1 * zoom, 11 * zoom, 13 * zoom);
+        ctx.fillStyle = '#10b981';
+        ctx.fillRect(dp.x + 8 * zoom, monY + 2 * zoom, 7 * zoom, 1.5 * zoom);
+        ctx.fillStyle = '#34d39980';
+        ctx.fillRect(dp.x + 8 * zoom, monY + 5 * zoom, 5 * zoom, 1.2 * zoom);
+        ctx.fillRect(dp.x + 8 * zoom, monY + 8 * zoom, 6 * zoom, 1.2 * zoom);
+      } else {
+        ctx.fillStyle = '#070b12';
+        ctx.fillRect(dp.x + 6 * zoom, monY - 1 * zoom, 11 * zoom, 13 * zoom);
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(dp.x + 10 * zoom, monY + 5 * zoom, 3 * zoom, 1 * zoom);
       }
 
       // 3. Hunter's Third SOC Monitor (Left Screen)
@@ -2107,18 +2156,25 @@
         ctx.beginPath();
         ctx.roundRect(dp.x - 30 * zoom, monY + 2 * zoom, 12 * zoom, 13 * zoom, 2 * zoom);
         ctx.fill();
-        ctx.strokeStyle = isWorking ? '#10b981' : '#1e293b';
+        ctx.strokeStyle = isWorking ? '#10b981' : (isCompleted ? '#10b981' : '#1e293b');
         ctx.stroke();
-        if (!isWorking) {
-          ctx.fillStyle = '#070b12';
-          ctx.fillRect(dp.x - 29 * zoom, monY + 3 * zoom, 10 * zoom, 11 * zoom);
-          ctx.fillStyle = '#064e3b30';
-          ctx.fillRect(dp.x - 27 * zoom, monY + 8 * zoom, 4 * zoom, 1 * zoom);
-        } else {
+        if (isWorking) {
           ctx.fillStyle = '#02241b';
           ctx.fillRect(dp.x - 29 * zoom, monY + 3 * zoom, 10 * zoom, 11 * zoom);
           ctx.fillStyle = Math.sin(globalTick * 0.2) > 0 ? '#ef4444' : '#10b981';
           ctx.fillRect(dp.x - 27 * zoom, monY + 5 * zoom, 6 * zoom, 2 * zoom);
+        } else if (isCompleted) {
+          ctx.fillStyle = '#02241b';
+          ctx.fillRect(dp.x - 29 * zoom, monY + 3 * zoom, 10 * zoom, 11 * zoom);
+          ctx.fillStyle = '#10b981';
+          ctx.fillRect(dp.x - 27 * zoom, monY + 6 * zoom, 6 * zoom, 2 * zoom);
+          ctx.fillStyle = '#34d399';
+          ctx.fillRect(dp.x - 27 * zoom, monY + 9 * zoom, 4 * zoom, 1 * zoom);
+        } else {
+          ctx.fillStyle = '#070b12';
+          ctx.fillRect(dp.x - 29 * zoom, monY + 3 * zoom, 10 * zoom, 11 * zoom);
+          ctx.fillStyle = '#064e3b30';
+          ctx.fillRect(dp.x - 27 * zoom, monY + 8 * zoom, 4 * zoom, 1 * zoom);
         }
       }
 
@@ -2211,12 +2267,15 @@
         ctx.fillRect(dp.x + 12 * zoom, dp.y - 25.5 * zoom, 8 * zoom, 2 * zoom);
       }
 
-      // 11. Custom Backlit Mechanical Keyboard (Only illuminated RGB when working)
+      // 11. Custom Backlit Mechanical Keyboard (Illuminated RGB when active, calm emerald when completed)
       ctx.fillStyle = '#1e293b';
       ctx.fillRect(dp.x - 8 * zoom, dp.y - 18 * zoom, 12 * zoom, 5 * zoom);
       if (isWorking) {
         const rgbColor = ['#34d399', '#38bdf8', '#818cf8', '#f43f5e'][Math.floor((globalTick * 0.08) % 4)];
         ctx.fillStyle = rgbColor;
+        ctx.fillRect(dp.x - 7 * zoom, dp.y - 17 * zoom, 10 * zoom, 3 * zoom);
+      } else if (isCompleted) {
+        ctx.fillStyle = '#10b98180';
         ctx.fillRect(dp.x - 7 * zoom, dp.y - 17 * zoom, 10 * zoom, 3 * zoom);
       } else {
         // Dormant matte keycaps
@@ -2413,7 +2472,7 @@
         ctx.stroke();
       }
 
-      // Hands Typing Motion on Keyboard (Only moves when actively working)
+      // Hands Typing Motion on Keyboard (or ambient coffee sip when idle)
       if (agent.state === 'coding') {
         ctx.fillStyle = '#fcd34d';
         if (agent.isWorking) {
@@ -2425,9 +2484,24 @@
             sound.playTyping();
           }
         } else {
-          // Stationary resting hands on desk
-          ctx.fillRect(p.x - 5 * zoom, cy + 4 * zoom, 3 * zoom, 2 * zoom);
-          ctx.fillRect(p.x + 2 * zoom, cy + 4 * zoom, 3 * zoom, 2 * zoom);
+          // Ambient idle coffee sip micro-animation
+          const seed = (agent.name.charCodeAt(0) || 0) * 47;
+          const sipPhase = (globalTick + seed) % 420;
+          const isSipping = sipPhase > 350 && sipPhase < 400;
+
+          if (isSipping) {
+            // Hand lifts coffee cup to mouth
+            ctx.fillRect(p.x - 5 * zoom, cy + 4 * zoom, 3 * zoom, 2 * zoom);
+            ctx.fillRect(p.x + 3 * zoom, cy - 2 * zoom, 3 * zoom, 3 * zoom);
+            ctx.fillStyle = '#f8fafc';
+            ctx.fillRect(p.x + 5 * zoom, cy - 4 * zoom, 3.5 * zoom, 4 * zoom);
+            ctx.fillStyle = '#78350f';
+            ctx.fillRect(p.x + 5.5 * zoom, cy - 4 * zoom, 2.5 * zoom, 1 * zoom);
+          } else {
+            // Stationary resting hands on desk
+            ctx.fillRect(p.x - 5 * zoom, cy + 4 * zoom, 3 * zoom, 2 * zoom);
+            ctx.fillRect(p.x + 2 * zoom, cy + 4 * zoom, 3 * zoom, 2 * zoom);
+          }
         }
       } else if (agent.state === 'briefing') {
         if (agent.isPrimary) {
@@ -2465,6 +2539,12 @@
         const isWorking = agent.isWorking;
         const isRecentDone = agent.completedFlash && agent.completedFlash > 0;
 
+        const isCompletedRecent = agent.status === 'completed' && (
+          (agent.completedAt && (Date.now() - agent.completedAt < 300000)) ||
+          agent.recentlyCompleted ||
+          isRecentDone
+        );
+
         let showFullBubble = false;
         if (bubbleMode === 'all') {
           showFullBubble = true;
@@ -2472,24 +2552,24 @@
           showFullBubble = isWorking || isSelected || isHovered || (agent.state === 'briefing');
         } else {
           // 'smart' mode (default): full bubble for active workers, selected, hovered, freshly completed, or during task briefing
-          showFullBubble = isWorking || isSelected || isHovered || isRecentDone || (agent.state === 'briefing');
+          showFullBubble = isWorking || isSelected || isHovered || isCompletedRecent || (agent.state === 'briefing');
         }
 
         if (showFullBubble) {
           // --- FULL COMIC SPEECH BUBBLE ---
           let icon = (agent.state === 'briefing') 
             ? (agent.isPrimary ? '👑' : '📋') 
-            : (isWorking ? '⚡' : (agent.status === 'completed' ? '✓' : '💤'));
+            : (isWorking ? '⚡' : (agent.status === 'completed' ? '🎉' : '💤'));
           let statusColor = (agent.state === 'briefing')
             ? '#38bdf8' 
-            : (isWorking ? '#34d399' : (agent.status === 'completed' ? '#38bdf8' : '#94a3b8'));
+            : (isWorking ? '#34d399' : (agent.status === 'completed' ? '#10b981' : '#94a3b8'));
           let borderColor = isSelected 
             ? '#ffffff' 
-            : (agent.state === 'briefing' ? '#38bdf8' : (isWorking ? '#10b981' : (agent.color || '#475569')));
+            : (agent.state === 'briefing' ? '#38bdf8' : (isWorking ? '#10b981' : (agent.status === 'completed' ? '#10b981' : (agent.color || '#475569'))));
           
           let toolName = (agent.state === 'briefing')
             ? (agent.isPrimary ? 'Delegating' : 'Briefing')
-            : (agent.tool || (isWorking ? 'Working' : (agent.status === 'completed' ? 'Done' : 'Idle')));
+            : (agent.status === 'completed' ? `Verified: ${agent.toolCount || 1} calls` : (agent.tool || (isWorking ? 'Working' : 'Idle')));
           if (toolName === 'SubagentHandback') toolName = 'Verified';
           const headerTitle = `${agent.name}`;
 
@@ -2505,7 +2585,9 @@
               subtitle = 'Executing command...';
             }
           } else if (agent.status === 'completed') {
-            subtitle = agent.files && agent.files.length > 0 ? `Verified: ${agent.files[0]}` : 'Task Completed';
+            subtitle = agent.thought && !agent.thought.toLowerCase().includes('standing by')
+              ? `✔ ${agent.thought.slice(0, 32)}`
+              : (agent.files && agent.files.length > 0 ? `✔ Verified: ${agent.files[0]}` : '✔ Sprint Task Verified');
           } else {
             subtitle = 'Idle at workstation';
           }
@@ -2859,6 +2941,9 @@
     // --- Lead Programmer Task Delegation & Personal Meeting System ---
     let meetingQueue = [];
     let currentMeeting = null;
+    let idlePatrolTimer = 0;
+    let patrolIndex = 0;
+    const PATROL_NAMES = ['Felix', 'Hunter', 'Ava', 'Archie', 'Victor'];
 
     function dispatchLeadToMeet(agent, taskDetail) {
       if (!agent || agent.id === 'claude-lead' || agent.id.startsWith('claude')) return;
@@ -2877,6 +2962,7 @@
     function updateLeadMeeting() {
       if (!currentMeeting) {
         if (meetingQueue.length > 0) {
+          idlePatrolTimer = 0;
           currentMeeting = meetingQueue.shift();
           currentMeeting.stage = 'walking_to';
           currentMeeting.timer = 0;
@@ -2894,6 +2980,18 @@
           claudeOrchestrator.thought = `Briefing ${currentMeeting.agent.name}: "${currentMeeting.taskDetail.slice(0, 32)}..."`;
 
           logConsole(`👑 <b>Lead Architect:</b> Stepping out of Executive Suite to personally meet <b>${currentMeeting.agent.name}</b>.`);
+        } else {
+          // If Claude is idle in his suite, perform a periodic standup walkaround check-in every ~15 seconds
+          idlePatrolTimer += 1 * simSpeed;
+          if (idlePatrolTimer > 750) {
+            idlePatrolTimer = 0;
+            const targetName = PATROL_NAMES[patrolIndex % PATROL_NAMES.length];
+            patrolIndex++;
+            const squadMember = agents.find(a => a.name.toLowerCase() === targetName.toLowerCase());
+            if (squadMember && !squadMember.isWorking && squadMember.state !== 'walking') {
+              dispatchLeadToMeet(squadMember, squadMember.thought || `Standup Check-in with ${squadMember.name}`);
+            }
+          }
         }
         return;
       }
@@ -3288,11 +3386,15 @@
           ag.files = sub.files && sub.files.length > 0 ? sub.files : ag.files;
           ag.status = sub.status === 'completed' ? 'completed' : 'working';
           ag.isWorking = sub.status !== 'completed';
-          if (wasWorking && sub.status === 'completed') {
-            ag.state = 'celebrating';
-            ag.currentAction = 'Handback (Verified)';
-            ag.completedFlash = 120; // 4s celebration popup before compacting
-            spawnConfetti(25);
+          if (sub.status === 'completed') {
+            if (!ag.completedAt) ag.completedAt = Date.now();
+            ag.recentlyCompleted = true;
+            if (wasWorking) {
+              ag.state = 'celebrating';
+              ag.currentAction = 'Handback (Verified)';
+              ag.completedFlash = 240; // 8s celebration popup before compacting
+              spawnConfetti(25);
+            }
           } else if (sub.status !== 'completed') {
             ag.state = 'coding';
             ag.targetPos = getDeskSeat(ag.desk);
@@ -3344,6 +3446,10 @@
           if (ag.isWorking) {
             ag.isWorking = false;
             ag.status = liveNames.has(nameLower) ? 'completed' : 'idle';
+            if (ag.status === 'completed') {
+              if (!ag.completedAt) ag.completedAt = Date.now();
+              ag.recentlyCompleted = true;
+            }
             ag.state = 'thinking';
             if (ag.status === 'idle') {
               ag.currentAction = ag.name === 'Hunter' 
@@ -3362,7 +3468,7 @@
                 : 'Workstation standing by for next task.';
               ag.tool = 'Idle';
             } else {
-              ag.currentAction = 'Task Complete (Standing by)';
+              ag.currentAction = `Verified (${ag.toolCount || 1} calls)`;
               ag.tool = 'Done';
             }
           }
@@ -3530,7 +3636,12 @@
         }
       });
 
-      if (closest) selectAgent(closest);
+      if (closest) {
+        selectAgent(closest);
+        if (closest.id !== 'claude-lead' && !closest.id.startsWith('claude')) {
+          dispatchLeadToMeet(closest, closest.thought || closest.role || 'Sprint Standup & Code Sync');
+        }
+      }
     });
 
     // Interactive Button Actions
