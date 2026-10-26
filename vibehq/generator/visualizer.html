@@ -290,7 +290,7 @@
     const GRID_W = 24;
     const GRID_H = 20;
     const TILE_W = 64;
-    const TILE_H = 32;
+    const TILE_H = 38;
 
     // Room boundaries:
     const ROOMS = {
@@ -316,7 +316,7 @@
     ];
 
     function getDeskSeat(desk) {
-      return { x: desk.x - 0.35, y: desk.y - 0.35 };
+      return { x: desk.x - 0.3, y: desk.y - 0.5 };
     }
 
     const DEDICATED_DESKS = {
@@ -564,9 +564,9 @@
 
     function isoToScreen(gx, gy, gz = 0) {
       const originX = canvas.getBoundingClientRect().width / 2;
-      const originY = 50;
+      const originY = 30;
       const sx = originX + (gx - gy) * (TILE_W / 2) * zoom + panX;
-      const sy = originY + (gx + gy) * (TILE_H / 2) * zoom + panY - gz * zoom;
+      const sy = originY + (gx + gy) * (TILE_H / 2) * zoom + panY - gz * 1.15 * zoom;
       return { x: sx, y: sy };
     }
 
@@ -1960,7 +1960,7 @@
       drawErgonomicMeshChair(seatCoord.x, seatCoord.y, 'desk', isLead);
 
       // 9. Workstation Monitors & Specialist Screen Visuals
-      const monY = dp.y - 39 * zoom;
+      const monY = dp.y - 44 * zoom;
 
       // Heavy Die-Cast Aluminum Monitor Arm & Desk Clamp
       ctx.fillStyle = '#475569';
@@ -2317,7 +2317,7 @@
         }
       }
 
-      const p = isoToScreen(agent.currentPos.x, agent.currentPos.y, 0);
+      const p = isoToScreen(agent.currentPos.x, agent.currentPos.y, 4);
       const isSelected = selectedAgent && selectedAgent.id === agent.id;
       const isHovered = hoveredAgent && hoveredAgent.id === agent.id;
 
@@ -2835,9 +2835,14 @@
       agentOverlayQueue = [];
 
       // Depth-sort desks and agents together so they occlude naturally in 2.5D space
+      // Agents seated at their desk get a small depth bias (+0.1) to render AFTER (on top of) their desk
       const sceneItems = [
         ...DESK_SLOTS.map((desk, idx) => ({ type: 'desk', depth: desk.x + desk.y, desk, idx })),
-        ...agents.map(agent => ({ type: 'agent', depth: agent.currentPos.x + agent.currentPos.y, agent }))
+        ...agents.map(agent => {
+          const seat = getDeskSeat(agent.desk);
+          const isSeated = Math.hypot(agent.currentPos.x - seat.x, agent.currentPos.y - seat.y) < 0.15;
+          return { type: 'agent', depth: agent.currentPos.x + agent.currentPos.y + (isSeated ? 0.9 : 0), agent };
+        })
       ].sort((a, b) => a.depth - b.depth);
 
       sceneItems.forEach(item => {
@@ -3176,7 +3181,7 @@
         const target = btn.dataset.target;
         const rect = canvas.getBoundingClientRect();
         const originX = rect.width / 2;
-        const originY = 50;
+        const originY = 30;
 
         let tgx = 12.0, tgy = 10.0, tZoom = 1.0;
         let matchedAgent = null;
