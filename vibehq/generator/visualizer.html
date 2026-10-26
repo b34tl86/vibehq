@@ -64,6 +64,16 @@
         <button id="btn-expand" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-all flex items-center gap-1.5 active:scale-95">
           <span id="expand-icon">⛶</span> Expand Studio
         </button>
+
+        <!-- Modern View Mode Switcher -->
+        <div class="flex items-center bg-slate-900 border border-slate-700/80 rounded-lg p-0.5 text-xs font-mono shadow-sm">
+          <button id="btn-view-top" class="px-2.5 py-1 rounded-md font-bold bg-violet-600 text-white shadow-sm transition-all flex items-center gap-1.5" title="Switch to Modern Top-Down 2D Blueprint View">
+            <span>📐</span> Top View
+          </button>
+          <button id="btn-view-iso" class="px-2.5 py-1 rounded-md text-slate-400 hover:text-slate-200 hover:bg-white/10 transition-all flex items-center gap-1.5" title="Switch to Isometric 3D Studio View">
+            <span>🏢</span> Isometric 3D
+          </button>
+        </div>
         <button id="btn-light" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors" title="Toggle Lighting (Day / Night)">
           <span id="light-icon">🌙</span>
         </button>
@@ -546,6 +556,7 @@
     let isDragging = false;
     let startDragX = 0;
     let startDragY = 0;
+    let viewMode = 'top'; // 'iso' = isometric 3D, 'top' = top-down 2D blueprint
 
     const canvas = document.getElementById('officeCanvas');
     const ctx = canvas.getContext('2d');
@@ -3080,6 +3091,531 @@
       }
     }
 
+    // --- TOP-DOWN 2D BLUEPRINT VIEW (Modern High-Tech Cyber Command Architecture) ---
+    const TD_ROOM_COLORS = {
+      lounge:      { bg: '#18121f', border: '#a78bfa', accent: '#c084fc', label: 'CAFÉ & LOUNGE', icon: '☕' },
+      executive:   { bg: '#0b162c', border: '#3b82f6', accent: '#60a5fa', label: 'EXECUTIVE SUITE', icon: '👑' },
+      serverVault: { bg: '#081726', border: '#06b6d4', accent: '#22d3ee', label: 'DATA VAULT', icon: '🗄️' },
+      uiStudio:    { bg: '#1c0d1e', border: '#f43f5e', accent: '#fb7185', label: 'DESIGN STUDIO', icon: '🎨' },
+      bullpen:     { bg: '#091c16', border: '#10b981', accent: '#34d399', label: 'ENGINEERING BULLPEN', icon: '⚡' },
+      qaLab:       { bg: '#081a24', border: '#0ea5e9', accent: '#38bdf8', label: 'QA & TELECOM LAB', icon: '🧪' },
+      socLab:      { bg: '#051d14', border: '#10b981', accent: '#4ade80', label: 'CYBER SOC DEFENSE', icon: '🥷' },
+      warRoom:     { bg: '#1a0d18', border: '#ec4899', accent: '#f472b6', label: 'WAR ROOM AMPHITHEATER', icon: '🤝' },
+    };
+
+    function getTopDownScale() {
+      const w = canvas.getBoundingClientRect().width;
+      const h = parseFloat(canvas.style.height) || 820;
+      const margin = 28;
+      const scaleX = (w - margin * 2) / GRID_W;
+      const scaleY = (h - margin * 2) / GRID_H;
+      const sc = Math.min(scaleX, scaleY) * zoom;
+      const offsetX = (w - GRID_W * sc) / 2 + panX;
+      const offsetY = margin + panY;
+      return { sc, offsetX, offsetY, w, h };
+    }
+
+    function topDownToScreen(gx, gy) {
+      const { sc, offsetX, offsetY } = getTopDownScale();
+      return { x: offsetX + gx * sc, y: offsetY + gy * sc, sc };
+    }
+
+    function getAgentScreenPos(agent) {
+      if (viewMode === 'top') {
+        const p = topDownToScreen(agent.currentPos.x, agent.currentPos.y);
+        return { x: p.x, y: p.y };
+      } else {
+        return isoToScreen(agent.currentPos.x, agent.currentPos.y, 4);
+      }
+    }
+
+    function renderTopDownView() {
+      const { sc, offsetX, offsetY, w, h } = getTopDownScale();
+
+      function toScreen(gx, gy) {
+        return { x: offsetX + gx * sc, y: offsetY + gy * sc };
+      }
+
+      // 1. Deep Space Cyber Command Background
+      ctx.fillStyle = '#060a12';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // 2. High-Tech Dot Matrix Blueprint Grid
+      ctx.fillStyle = 'rgba(148, 163, 184, 0.1)';
+      for (let gx = 0; gx <= GRID_W; gx++) {
+        for (let gy = 0; gy <= GRID_H; gy++) {
+          const p = toScreen(gx, gy);
+          if (gx % 4 === 0 && gy % 4 === 0) {
+            ctx.fillStyle = 'rgba(56, 189, 248, 0.25)';
+            ctx.fillRect(p.x - 1.5, p.y - 1.5, 3, 3);
+            ctx.fillStyle = 'rgba(148, 163, 184, 0.1)';
+          } else {
+            ctx.fillRect(p.x - 0.75, p.y - 0.75, 1.5, 1.5);
+          }
+        }
+      }
+
+      // 3. Modern Glassmorphic Room Enclosures with Glowing Neon Accents
+      Object.entries(ROOMS).forEach(([key, room]) => {
+        const rc = TD_ROOM_COLORS[key] || { bg: '#0f172a', border: '#475569', accent: '#94a3b8', label: key, icon: '🏢' };
+        const tl = toScreen(room.x1, room.y1);
+        const br = toScreen(room.x2, room.y2);
+        const rw = br.x - tl.x;
+        const rh = br.y - tl.y;
+
+        // Room Background Gradient
+        const grad = ctx.createLinearGradient(tl.x, tl.y, br.x, br.y);
+        grad.addColorStop(0, rc.bg);
+        grad.addColorStop(1, '#050810');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.roundRect(tl.x, tl.y, rw, rh, 10);
+        ctx.fill();
+
+        // Room Glass Border with Soft Glow
+        ctx.strokeStyle = `${rc.border}45`;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.roundRect(tl.x, tl.y, rw, rh, 10);
+        ctx.stroke();
+
+        // High-Tech Corner Brackets
+        const bracket = Math.min(16, sc * 0.4);
+        ctx.strokeStyle = rc.accent;
+        ctx.lineWidth = 2.5;
+        // TL
+        ctx.beginPath(); ctx.moveTo(tl.x + bracket, tl.y); ctx.lineTo(tl.x, tl.y); ctx.lineTo(tl.x, tl.y + bracket); ctx.stroke();
+        // TR
+        ctx.beginPath(); ctx.moveTo(br.x - bracket, tl.y); ctx.lineTo(br.x, tl.y); ctx.lineTo(br.x, tl.y + bracket); ctx.stroke();
+        // BL
+        ctx.beginPath(); ctx.moveTo(tl.x, br.y - bracket); ctx.lineTo(tl.x, br.y); ctx.lineTo(tl.x + bracket, br.y); ctx.stroke();
+        // BR
+        ctx.beginPath(); ctx.moveTo(br.x - bracket, br.y); ctx.lineTo(br.x, br.y); ctx.lineTo(br.x, br.y - bracket); ctx.stroke();
+
+        // Room Badge (Top-Left inside room)
+        const badgeW = Math.min(180, rw - 16);
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+        ctx.beginPath();
+        ctx.roundRect(tl.x + 8, tl.y + 8, badgeW, 20, 5);
+        ctx.fill();
+        ctx.strokeStyle = `${rc.border}80`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Glowing Room LED
+        ctx.fillStyle = rc.accent;
+        ctx.beginPath();
+        ctx.arc(tl.x + 18, tl.y + 18, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.font = `bold 10px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+        ctx.fillStyle = '#f1f5f9';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(`${rc.icon} ${rc.label}`, tl.x + 26, tl.y + 18);
+      });
+
+      // 4. Data Vault Server Racks with Animated LED Blade Blinkers
+      const sv = ROOMS.serverVault;
+      if (sv) {
+        for (let rx = sv.x1 + 1.2; rx < sv.x2 - 1; rx += 2.2) {
+          for (let ry = sv.y1 + 1.8; ry < sv.y2 - 1; ry += 1.8) {
+            const p = toScreen(rx, ry);
+            const rackW = sc * 1.5;
+            const rackH = sc * 0.9;
+            ctx.fillStyle = '#0f172a';
+            ctx.beginPath();
+            ctx.roundRect(p.x, p.y, rackW, rackH, 3);
+            ctx.fill();
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // Animated LED Blade Activity Lights
+            for (let led = 0; led < 5; led++) {
+              const ledActive = Math.sin(globalTick * 0.15 + (rx * 7) + (ry * 3) + led) > 0.1;
+              const ledColors = ['#10b981', '#38bdf8', '#34d399', '#f59e0b', '#06b6d4'];
+              ctx.fillStyle = ledActive ? ledColors[(led + Math.floor(globalTick * 0.05)) % ledColors.length] : '#1e293b';
+              ctx.fillRect(p.x + 4 + led * 6 * (sc / 24), p.y + 4, 3, 3);
+            }
+          }
+        }
+      }
+
+      // 5. High-Detail Modern Workstations (Curved Desks & Dynamic Screens)
+      DESK_SLOTS.forEach(desk => {
+        const dp = toScreen(desk.x, desk.y);
+        const dw = sc * 1.7;
+        const dh = sc * 1.1;
+        const assignedAgent = agents.find(a => a.desk === desk);
+        const isWorking = assignedAgent && assignedAgent.isWorking;
+        const isCompleted = assignedAgent && (assignedAgent.status === 'completed' || (assignedAgent.completedAt && (Date.now() - assignedAgent.completedAt < 300000)));
+
+        // Desk Shadow
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+        ctx.beginPath();
+        ctx.roundRect(dp.x - dw / 2 + 2, dp.y - dh / 2 + 4, dw, dh, 6);
+        ctx.fill();
+
+        // Ambient Screen Glow on Desk Surface when active
+        if (isWorking) {
+          const deskGlow = ctx.createRadialGradient(dp.x, dp.y - dh * 0.2, 2, dp.x, dp.y, dw * 0.85);
+          const glowColor = assignedAgent.name === 'Hunter' 
+            ? 'rgba(16, 185, 129, 0.45)' 
+            : (assignedAgent.name === 'Ava' 
+              ? 'rgba(244, 63, 94, 0.4)' 
+              : 'rgba(56, 189, 248, 0.4)');
+          deskGlow.addColorStop(0, glowColor);
+          deskGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+          ctx.fillStyle = deskGlow;
+          ctx.beginPath();
+          ctx.arc(dp.x, dp.y, dw * 0.85, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (isCompleted) {
+          const compGlow = ctx.createRadialGradient(dp.x, dp.y, 2, dp.x, dp.y, dw * 0.65);
+          compGlow.addColorStop(0, 'rgba(16, 185, 129, 0.25)');
+          compGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+          ctx.fillStyle = compGlow;
+          ctx.beginPath();
+          ctx.arc(dp.x, dp.y, dw * 0.65, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Modern Curved Workstation Surface
+        const deskFill = isWorking ? '#1e293b' : (isCompleted ? '#13231e' : '#0f172a');
+        ctx.fillStyle = deskFill;
+        ctx.beginPath();
+        ctx.roundRect(dp.x - dw / 2, dp.y - dh / 2, dw, dh, 6);
+        ctx.fill();
+
+        ctx.strokeStyle = isWorking ? '#10b981' : (isCompleted ? '#10b981' : '#334155');
+        ctx.lineWidth = isWorking ? 1.8 : 1;
+        ctx.stroke();
+
+        // Ergonomic Swivel Chair Top View (behind desk)
+        const seat = getDeskSeat(desk);
+        const sp = toScreen(seat.x, seat.y);
+        ctx.fillStyle = isWorking ? '#334155' : '#1e293b';
+        ctx.beginPath();
+        ctx.arc(sp.x, sp.y, sc * 0.38, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = isWorking ? '#10b981' : '#475569';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Curved Triple Display Array
+        const monY = dp.y - dh * 0.28;
+        const centerW = dw * 0.58;
+        const sideW = dw * 0.22;
+        const monH = Math.max(5, sc * 0.16);
+
+        // Center Curved Ultrawide Display
+        ctx.fillStyle = isWorking ? '#020617' : (isCompleted ? '#052219' : '#0b1120');
+        ctx.beginPath();
+        ctx.roundRect(dp.x - centerW / 2, monY, centerW, monH, 2);
+        ctx.fill();
+        ctx.strokeStyle = isWorking ? '#38bdf8' : (isCompleted ? '#10b981' : '#334155');
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+
+        // Left Angled Display
+        ctx.fillStyle = isWorking ? '#020617' : '#0b1120';
+        ctx.beginPath();
+        ctx.roundRect(dp.x - centerW / 2 - sideW - 2, monY + 2, sideW, monH, 2);
+        ctx.fill();
+        ctx.strokeStyle = isWorking ? '#10b981' : '#1e293b';
+        ctx.stroke();
+
+        // Right Angled Display
+        ctx.beginPath();
+        ctx.roundRect(dp.x + centerW / 2 + 2, monY + 2, sideW, monH, 2);
+        ctx.fill();
+        ctx.strokeStyle = isWorking ? '#10b981' : '#1e293b';
+        ctx.stroke();
+
+        // ANIMATED LIVE CODE STREAMS ON WORKING MONITORS
+        if (isWorking) {
+          // Streaming syntax lines across center display
+          for (let l = 0; l < 3; l++) {
+            const lineX = dp.x - centerW / 2 + 4 + l * (centerW / 3.2);
+            const lineOffset = (globalTick * 1.8 + l * 5) % (monH - 1);
+            ctx.fillStyle = ['#38bdf8', '#34d399', '#f43f5e'][l % 3];
+            ctx.fillRect(lineX, monY + 1 + lineOffset, 6, 1.5);
+          }
+          // Glowing Matrix Blip on left monitor
+          ctx.fillStyle = Math.sin(globalTick * 0.2) > 0 ? '#34d399' : '#10b981';
+          ctx.fillRect(dp.x - centerW / 2 - sideW + 2, monY + 3, sideW - 4, 2);
+        } else if (isCompleted) {
+          // Green Verified Pass Checkmark Bar
+          ctx.fillStyle = '#10b981';
+          ctx.fillRect(dp.x - centerW / 2 + 4, monY + 2, centerW - 8, monH - 4);
+        } else {
+          // Standby Cyan Ready LED
+          const pulse = Math.sin(globalTick * 0.08) * 0.35 + 0.65;
+          ctx.fillStyle = `rgba(56, 189, 248, ${pulse})`;
+          ctx.fillRect(dp.x - 2, monY + monH / 2 - 1, 4, 2);
+        }
+
+        // Custom Mechanical Keyboard
+        const kbW = dw * 0.36;
+        const kbH = Math.max(3.5, sc * 0.12);
+        const kbY = dp.y + dh * 0.15;
+        ctx.fillStyle = '#1e293b';
+        ctx.beginPath();
+        ctx.roundRect(dp.x - kbW / 2, kbY, kbW, kbH, 1.5);
+        ctx.fill();
+        if (isWorking) {
+          // Animated RGB Keyboard Spectrum Backlighting
+          const rgbColor = ['#34d399', '#38bdf8', '#818cf8', '#f43f5e'][Math.floor((globalTick * 0.1) % 4)];
+          ctx.fillStyle = rgbColor;
+          ctx.fillRect(dp.x - kbW / 2 + 1, kbY + 1, kbW - 2, kbH - 2);
+        } else if (isCompleted) {
+          ctx.fillStyle = '#10b98180';
+          ctx.fillRect(dp.x - kbW / 2 + 1, kbY + 1, kbW - 2, kbH - 2);
+        }
+
+        // Ceramic Coffee Mug with Rising Animated Steam Particles
+        const mugX = dp.x + dw * 0.32;
+        const mugY = dp.y + dh * 0.12;
+        ctx.fillStyle = '#f8fafc';
+        ctx.beginPath();
+        ctx.arc(mugX, mugY, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#78350f';
+        ctx.beginPath();
+        ctx.arc(mugX, mugY, 1.8, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Rising Steam blip
+        if (globalTick % 20 < 10) {
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+          ctx.fillRect(mugX - 0.5, mugY - 4 - (globalTick % 10) * 0.4, 1.5, 2);
+        }
+      });
+
+      // 6. ANIMATED LASER DATA TRANSMISSION STREAMS (Claude <---> Active Workers)
+      const claude = agents.find(a => a.isPrimary);
+      if (claude) {
+        const cp = toScreen(claude.currentPos.x, claude.currentPos.y);
+        agents.forEach((ag, agIdx) => {
+          if (ag.isPrimary) return;
+          if (!ag.isWorking && ag.status !== 'completed') return;
+          const ap = toScreen(ag.currentPos.x, ag.currentPos.y);
+
+          // Glowing Laser Conduit Line
+          ctx.save();
+          ctx.strokeStyle = ag.isWorking ? 'rgba(56, 189, 248, 0.45)' : 'rgba(16, 185, 129, 0.25)';
+          ctx.lineWidth = ag.isWorking ? 1.8 : 1;
+          ctx.setLineDash([6, 6]);
+          ctx.beginPath();
+          ctx.moveTo(cp.x, cp.y);
+          ctx.lineTo(ap.x, ap.y);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.restore();
+
+          // Animated Glowing Data Telemetry Packets Travelling in Real-Time!
+          if (ag.isWorking) {
+            const packetT = ((globalTick * 0.02 + agIdx * 0.35) % 1);
+            const packetX = cp.x + (ap.x - cp.x) * packetT;
+            const packetY = cp.y + (ap.y - cp.y) * packetT;
+
+            // Packet Spark Glow
+            ctx.fillStyle = '#38bdf8';
+            ctx.beginPath();
+            ctx.arc(packetX, packetY, 3.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(packetX, packetY, 1.8, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        });
+      }
+
+      // 7. LIVING ANIMATED AGENTS IN TOP-DOWN VIEW
+      agents.forEach(agent => {
+        // Smooth Interpolated Walk Animation
+        const lerpSpeed = 0.08 * simSpeed;
+        const dx = agent.targetPos.x - agent.currentPos.x;
+        const dy = agent.targetPos.y - agent.currentPos.y;
+        const dist = Math.hypot(dx, dy);
+        if (dist > 0.05) {
+          agent.currentPos.x += (dx / dist) * Math.min(dist, lerpSpeed);
+          agent.currentPos.y += (dy / dist) * Math.min(dist, lerpSpeed);
+          agent.state = 'walking';
+        } else {
+          agent.currentPos.x = agent.targetPos.x;
+          agent.currentPos.y = agent.targetPos.y;
+        }
+
+        const p = toScreen(agent.currentPos.x, agent.currentPos.y);
+        const r = sc * 0.42;
+        const isSelected = selectedAgent && selectedAgent.id === agent.id;
+        const isHovered = hoveredAgent && hoveredAgent.id === agent.id;
+        const isWorking = agent.isWorking;
+        const isCompleted = agent.status === 'completed';
+
+        // 7A. DYNAMIC ACTIVE WORKER ANIMATIONS
+        if (isWorking) {
+          // 1. Expanding Sonar Energy Wave Ring
+          const pulse = (globalTick * 0.04) % 1;
+          ctx.strokeStyle = `rgba(16, 185, 129, ${1 - pulse})`;
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, r + 4 + pulse * 22, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // 2. Rotating Cyber Radar Orbiting Telemetry Particles
+          for (let d = 0; d < 3; d++) {
+            const angle = globalTick * 0.08 + (d * (Math.PI * 2 / 3));
+            const orbitR = r + 8;
+            const ox = p.x + Math.cos(angle) * orbitR;
+            const oy = p.y + Math.sin(angle) * orbitR;
+            ctx.fillStyle = '#34d399';
+            ctx.beginPath();
+            ctx.arc(ox, oy, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          // 3. Animated Typing Indicator (Bouncing Activity Dots above avatar)
+          for (let dot = 0; dot < 3; dot++) {
+            const bounce = Math.sin(globalTick * 0.3 + dot * 0.9) * 2.5;
+            ctx.fillStyle = '#38bdf8';
+            ctx.beginPath();
+            ctx.arc(p.x - 6 + dot * 6, p.y - r - 8 + bounce, 1.8, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+
+        // Selection & Hover Ring
+        if (isSelected || isHovered) {
+          ctx.strokeStyle = isSelected ? '#ffffff' : '#818cf8';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, r + 4, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        // Status Border Ring
+        const ringColor = isWorking ? '#10b981' : (isCompleted ? '#10b981' : '#475569');
+        ctx.strokeStyle = ringColor;
+        ctx.lineWidth = 2.8;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Agent Avatar Disc with Vibrant Radial Gradient
+        const agentGrad = ctx.createRadialGradient(p.x, p.y - r * 0.3, 0, p.x, p.y, r);
+        agentGrad.addColorStop(0, agent.shirtColor || agent.color || '#6366f1');
+        agentGrad.addColorStop(1, '#090d16');
+        ctx.fillStyle = agentGrad;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, r - 1.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Avatar Emoji with subtle breathing oscillation
+        const breathe = isWorking ? Math.sin(globalTick * 0.15) * 1.5 : 0;
+        const emojiSize = Math.max(14, r * 1.15 + breathe);
+        ctx.font = `${emojiSize}px -apple-system, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(agent.avatar, p.x, p.y + 1);
+
+        // Tool Badge (Top-Right)
+        if (isWorking && agent.tool && agent.tool !== 'Idle') {
+          const badgeX = p.x + r * 0.7;
+          const badgeY = p.y - r * 0.7;
+          ctx.fillStyle = '#0f172a';
+          ctx.beginPath();
+          ctx.arc(badgeX, badgeY, 8, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = '#10b981';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+          ctx.fillStyle = '#fde047';
+          ctx.font = 'bold 8px monospace';
+          ctx.fillText('⚡', badgeX, badgeY + 1);
+        }
+
+        // Agent Name Label
+        ctx.font = `bold ${Math.max(10, sc * 0.26)}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+        ctx.fillStyle = '#f8fafc';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillText(agent.name, p.x, p.y + r + 5);
+
+        // Live Action Pill / Tool Call Counter
+        ctx.font = `${Math.max(9, sc * 0.2)}px "JetBrains Mono", Consolas, monospace`;
+        if (isWorking) {
+          ctx.fillStyle = '#34d399';
+          const actionText = agent.currentAction || `${agent.tool || 'Action'}: Active`;
+          ctx.fillText(`⚡ ${actionText.slice(0, 26)}`, p.x, p.y + r + 6 + Math.max(11, sc * 0.28));
+        } else if (isCompleted) {
+          ctx.fillStyle = '#10b981';
+          ctx.fillText(`✔ Verified (${agent.toolCount || 0} calls)`, p.x, p.y + r + 6 + Math.max(11, sc * 0.28));
+        } else {
+          ctx.fillStyle = '#64748b';
+          ctx.fillText('● Standby', p.x, p.y + r + 6 + Math.max(11, sc * 0.28));
+        }
+
+        // 8. FULL COMIC SPEECH BUBBLES IN TOP VIEW (Active / Briefing / Hovered / Selected)
+        const isRecentDone = agent.completedFlash && agent.completedFlash > 0;
+        const isCompletedRecent = agent.status === 'completed' && agent.completedAt && (Date.now() - agent.completedAt < 300000);
+        let showBubble = (bubbleMode === 'all') || isWorking || isSelected || isHovered || (agent.state === 'briefing') || isRecentDone;
+        if (bubbleMode === 'activeOnly') {
+          showBubble = isWorking || isSelected || isHovered || (agent.state === 'briefing');
+        }
+
+        if (showBubble) {
+          const bubbleX = p.x;
+          const bubbleY = p.y - r - 26;
+          const bubbleText = (agent.state === 'briefing')
+            ? (agent.isPrimary ? `Briefing: "${agent.thought ? agent.thought.slice(0, 28) : 'Task'}"` : 'Receiving Briefing from Claude')
+            : (isWorking 
+              ? `${agent.tool || 'Tool'}: ${agent.currentAction || 'Running'}` 
+              : (isCompleted ? `Verified: ${agent.toolCount || 0} tool calls` : 'Standing by at station'));
+
+          ctx.font = `bold 10px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+          const textW = ctx.measureText(bubbleText).width;
+          const cardW = Math.max(110, textW + 24);
+          const cardH = 22;
+
+          // Bubble Card
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
+          ctx.beginPath();
+          ctx.roundRect(bubbleX - cardW / 2, bubbleY - cardH, cardW, cardH, 6);
+          ctx.fill();
+
+          ctx.strokeStyle = isWorking ? '#10b981' : (agent.state === 'briefing' ? '#38bdf8' : (isCompleted ? '#10b981' : '#475569'));
+          ctx.lineWidth = 1.2;
+          ctx.stroke();
+
+          // Tail
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
+          ctx.beginPath();
+          ctx.moveTo(bubbleX - 4, bubbleY);
+          ctx.lineTo(bubbleX, bubbleY + 5);
+          ctx.lineTo(bubbleX + 4, bubbleY);
+          ctx.closePath();
+          ctx.fill();
+
+          // Text Inside Bubble
+          ctx.fillStyle = isWorking ? '#34d399' : (agent.state === 'briefing' ? '#38bdf8' : '#e2e8f0');
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(bubbleText.slice(0, 36), bubbleX, bubbleY - cardH / 2);
+        }
+      });
+
+      // 9. Modern Blueprint Watermark & Mode Pill
+      ctx.font = 'bold 11px -apple-system, sans-serif';
+      ctx.fillStyle = 'rgba(100, 116, 139, 0.4)';
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText('VIBEHQ // ARCHITECTURAL TOP-DOWN BLUEPRINT [LIVE TELEMETRY]', w - 16, h - 12);
+    }
+
     // --- Main Game Loop ---
     function renderLoop() {
       if (!isPaused) {
@@ -3092,12 +3628,17 @@
       });
       updateLeadMeeting();
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      renderOfficeFloor();
-      renderRoomFixtures();
-      renderWorkstationsAndAgents();
-      updateAndRenderParticles();
-      renderAtmosphericLighting();
-      if (isCRTMode) renderCRTEffect();
+
+      if (viewMode === 'top') {
+        renderTopDownView();
+      } else {
+        renderOfficeFloor();
+        renderRoomFixtures();
+        renderWorkstationsAndAgents();
+        updateAndRenderParticles();
+        renderAtmosphericLighting();
+        if (isCRTMode) renderCRTEffect();
+      }
       requestAnimationFrame(renderLoop);
     }
     requestAnimationFrame(renderLoop);
@@ -3121,8 +3662,9 @@
       let minDist = 36 * zoom;
 
       agents.forEach(ag => {
-        const p = isoToScreen(ag.currentPos.x, ag.currentPos.y, 0);
-        const dist = Math.hypot(p.x - sx, (p.y - 14 * zoom) - sy);
+        const p = getAgentScreenPos(ag);
+        const hitY = viewMode === 'top' ? p.y : (p.y - 14 * zoom);
+        const dist = Math.hypot(p.x - sx, hitY - sy);
         if (dist < minDist) {
           minDist = dist;
           closest = ag;
@@ -3219,8 +3761,14 @@
 
         zoom = tZoom;
         document.getElementById('zoom-level').innerText = `${Math.round(zoom * 100)}%`;
-        panX = -(tgx - tgy) * (TILE_W / 2) * zoom;
-        panY = (rect.height / 2 - originY) - (tgx + tgy) * (TILE_H / 2) * zoom;
+        if (viewMode === 'top') {
+          const { sc, w, h } = getTopDownScale();
+          panX = (w / 2) - (tgx * sc);
+          panY = (h / 2) - (tgy * sc);
+        } else {
+          panX = -(tgx - tgy) * (TILE_W / 2) * zoom;
+          panY = (rect.height / 2 - originY) - (tgx + tgy) * (TILE_H / 2) * zoom;
+        }
 
         if (matchedAgent) {
           selectAgent(matchedAgent);
@@ -3633,8 +4181,9 @@
       let minDist = 48 * zoom;
 
       agents.forEach(ag => {
-        const p = isoToScreen(ag.currentPos.x, ag.currentPos.y, 0);
-        const dist = Math.hypot(p.x - sx, p.y - sy);
+        const p = getAgentScreenPos(ag);
+        const hitY = viewMode === 'top' ? p.y : (p.y - 14 * zoom);
+        const dist = Math.hypot(p.x - sx, hitY - sy);
         if (dist < minDist) {
           minDist = dist;
           closest = ag;
@@ -3716,6 +4265,45 @@
       logConsole(`📺 Retro CRT Scanlines ${isCRTMode ? 'Enabled' : 'Disabled'}.`);
     };
 
+    // Modern View Mode Switcher Handlers (Top-Down Blueprint <---> Isometric 3D)
+    function updateViewModeButtons() {
+      const topBtn = document.getElementById('btn-view-top');
+      const isoBtn = document.getElementById('btn-view-iso');
+      if (!topBtn || !isoBtn) return;
+      if (viewMode === 'top') {
+        topBtn.className = 'px-2.5 py-1 rounded-md font-bold bg-violet-600 text-white shadow-sm transition-all flex items-center gap-1.5';
+        isoBtn.className = 'px-2.5 py-1 rounded-md text-slate-400 hover:text-slate-200 hover:bg-white/10 transition-all flex items-center gap-1.5';
+      } else {
+        isoBtn.className = 'px-2.5 py-1 rounded-md font-bold bg-indigo-600 text-white shadow-sm transition-all flex items-center gap-1.5';
+        topBtn.className = 'px-2.5 py-1 rounded-md text-slate-400 hover:text-slate-200 hover:bg-white/10 transition-all flex items-center gap-1.5';
+      }
+    }
+
+    function setViewMode(mode) {
+      viewMode = mode;
+      panX = 0;
+      panY = 0;
+      zoom = 1.0;
+      document.getElementById('zoom-level').innerText = '100%';
+      updateViewModeButtons();
+      sound.playClick();
+      logConsole(`📐 <b>View Mode:</b> Switched to <b>${mode === 'top' ? 'Top-Down 2D Blueprint' : 'Isometric 3D Studio'}</b>.`);
+    }
+
+    const btnViewTop = document.getElementById('btn-view-top');
+    const btnViewIso = document.getElementById('btn-view-iso');
+    if (btnViewTop) btnViewTop.onclick = () => setViewMode('top');
+    if (btnViewIso) btnViewIso.onclick = () => setViewMode('iso');
+    updateViewModeButtons();
+
+    // Hotkey 'V' toggles view mode
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.key === 'v' || e.key === 'V') {
+        setViewMode(viewMode === 'top' ? 'iso' : 'top');
+      }
+    });
+
     // Bubble mode toggles (Smart / Active Only / Show All)
     function setBubbleMode(mode) {
       bubbleMode = mode;
@@ -3740,9 +4328,14 @@
     document.getElementById('filter-active').onclick = () => { squadFilter = 'active'; updateUI(); };
     document.getElementById('filter-done').onclick = () => { squadFilter = 'done'; updateUI(); };
 
-    // Direct URL Deeplink & Hash Actions (e.g. #meet-hunter, #meet-felix)
+    // Direct URL Deeplink & Hash Actions (e.g. #iso, #top, #meet-hunter, #meet-felix)
     if (window.location.hash) {
       const hash = window.location.hash.toLowerCase();
+      if (hash.includes('iso')) {
+        setViewMode('iso');
+      } else if (hash.includes('top')) {
+        setViewMode('top');
+      }
       if (hash.includes('meet')) {
         let targetName = 'Hunter';
         if (hash.includes('felix')) targetName = 'Felix';
