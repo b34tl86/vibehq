@@ -383,20 +383,20 @@
 
     // Dedicated Specialist Desks (Permanent Core Squad):
     const DESK_SLOTS = [
-      { x: 11.5, y: 3.5,  seatX: 11.5, seatY: 3.22,  name: "Executive Lead Desk", zone: "executive", agentName: "Claude", facing: 'south' },
-      { x: 5.8,  y: 16.0, seatX: 5.8,  seatY: 15.65, name: "Front Reception Desk", zone: "reception", agentName: "Tally", facing: 'south' },
-      { x: 18.0, y: 10.0, seatX: 18.0, seatY: 9.72,  name: "QA Lab Desk", zone: "qaLab", agentName: "Victor", facing: 'south' },
-      { x: 4.0,  y: 10.0, seatX: 4.0,  seatY: 9.72,  name: "UI Design Lead Desk", zone: "uiStudio", agentName: "Ava", facing: 'south' },
-      { x: 10.0, y: 10.0, seatX: 10.0, seatY: 9.72,  name: "Backend Core Desk", zone: "bullpen", agentName: "Felix", facing: 'south' },
-      { x: 13.2, y: 10.5, seatX: 13.2, seatY: 10.22, name: "Documentation & Chronicler Desk", zone: "bullpen", agentName: "Archie", facing: 'south' },
-      { x: 21.0, y: 10.0, seatX: 21.0, seatY: 9.72,  name: "Cyber SOC Command Desk", zone: "qaLab", agentName: "Hunter", facing: 'south' },
+      { x: 11.5, y: 3.5,  seatX: 11.34, seatY: 3.34,  name: "Executive Lead Desk", zone: "executive", agentName: "Claude", facing: 'south' },
+      { x: 5.8,  y: 16.0, seatX: 5.64,  seatY: 15.84, name: "Front Reception Desk", zone: "reception", agentName: "Tally", facing: 'south' },
+      { x: 18.0, y: 10.0, seatX: 17.84, seatY: 9.84,  name: "QA Lab Desk", zone: "qaLab", agentName: "Victor", facing: 'south' },
+      { x: 4.0,  y: 10.0, seatX: 3.84,  seatY: 9.84,  name: "UI Design Lead Desk", zone: "uiStudio", agentName: "Ava", facing: 'south' },
+      { x: 10.0, y: 10.0, seatX: 9.84,  seatY: 9.84,  name: "Backend Core Desk", zone: "bullpen", agentName: "Felix", facing: 'south' },
+      { x: 13.2, y: 10.5, seatX: 13.04, seatY: 10.34, name: "Documentation & Chronicler Desk", zone: "bullpen", agentName: "Archie", facing: 'south' },
+      { x: 21.0, y: 10.0, seatX: 20.84, seatY: 9.84,  name: "Cyber SOC Command Desk", zone: "qaLab", agentName: "Hunter", facing: 'south' },
     ];
 
     function getDeskSeat(desk) {
       if (desk.seatX !== undefined && desk.seatY !== undefined) {
         return { x: desk.seatX, y: desk.seatY };
       }
-      return { x: desk.x, y: desk.y - 0.28 };
+      return { x: desk.x - 0.16, y: desk.y - 0.16 };
     }
 
     const DEDICATED_DESKS = {
@@ -2328,7 +2328,7 @@
         : (isClay ? '#cbd5e1' : (isNightMode ? '#475569' : '#64748b'));
       ctx.fillStyle = seatFill;
       ctx.beginPath();
-      ctx.ellipse(p.x, p.y - 1.5 * zoom, 8.5 * zoom, 5.2 * zoom, 0, 0, Math.PI * 2);
+      ctx.ellipse(p.x, p.y - 1.5 * zoom, 8.5 * zoom, 5.2 * zoom, ROOM_ANGLE, 0, Math.PI * 2);
       ctx.fill();
       ctx.strokeStyle = seatBorder;
       ctx.lineWidth = 1.1 * zoom;
@@ -2342,7 +2342,7 @@
       ctx.lineTo(p.x + 5.5 * zoom, p.y - 1.5 * zoom);
       ctx.stroke();
 
-      // E. 3D Adjustable Armrests with Soft PU Pads
+      // E. 3D Adjustable Armrests with Soft PU Pads (Angled with Chair)
       ctx.strokeStyle = seatBorder;
       ctx.lineWidth = 1.5 * zoom;
       // Left arm stanchion & pad
@@ -2364,32 +2364,33 @@
       ctx.roundRect(p.x + 5 * zoom, p.y - 8 * zoom, 4.5 * zoom, 2 * zoom, 1 * zoom);
       ctx.fill();
 
-      // F. High-Back Breathable Mesh Backrest with Dynamic Spine Y-Frame
+      // F. High-Back Breathable Mesh Backrest (Parallel to Room & Desk Angle)
+      ctx.save();
+      const isNorthFacing = facingDir === 'north';
+      const lumbarY = isNorthFacing ? p.y - 6 * zoom : p.y - 11 * zoom;
+      ctx.translate(p.x, lumbarY);
+      ctx.rotate(ROOM_ANGLE);
+
+      // Dynamic spine
       ctx.strokeStyle = isCyber ? '#334155' : (isClay ? '#cbd5e1' : '#94a3b8');
       ctx.lineWidth = 2 * zoom;
-
-      const isNorthFacing = facingDir === 'north';
-      const spineStartY = isNorthFacing ? p.y + 0.5 * zoom : p.y - 1.5 * zoom;
-      const spineEndY = isNorthFacing ? p.y - 10 * zoom : p.y - 16 * zoom;
       ctx.beginPath();
-      ctx.moveTo(p.x, spineStartY);
-      ctx.lineTo(p.x, spineEndY);
+      ctx.moveTo(0, 9 * zoom);
+      ctx.lineTo(0, -6 * zoom);
       ctx.stroke();
 
       // Horizontal Lumbar Support Band
-      const lumbarY = isNorthFacing ? p.y - 6 * zoom : p.y - 11 * zoom;
       ctx.fillStyle = isCyber ? '#020617' : (isClay ? '#e2e8f0' : '#0f172a');
       ctx.beginPath();
-      ctx.roundRect(p.x - 5.5 * zoom, lumbarY, 11 * zoom, 2.8 * zoom, 1.2 * zoom);
+      ctx.roundRect(-5.5 * zoom, -1.4 * zoom, 11 * zoom, 2.8 * zoom, 1.2 * zoom);
       ctx.fill();
 
       // Mesh Backrest Frame (Curved ergonomic contour)
-      const meshBackY = isNorthFacing ? p.y - 12 * zoom : p.y - 18 * zoom;
       ctx.fillStyle = isCyber 
         ? 'rgba(11, 19, 41, 0.88)' 
         : (isClay ? 'rgba(248, 250, 252, 0.90)' : (isNightMode ? 'rgba(15, 23, 42, 0.85)' : 'rgba(100, 116, 139, 0.85)'));
       ctx.beginPath();
-      ctx.roundRect(p.x - 7 * zoom, meshBackY, 14 * zoom, 14 * zoom, 3.5 * zoom);
+      ctx.roundRect(-7 * zoom, -7 * zoom, 14 * zoom, 14 * zoom, 3.5 * zoom);
       ctx.fill();
       ctx.strokeStyle = seatBorder;
       ctx.lineWidth = 1.2 * zoom;
@@ -2399,9 +2400,9 @@
       ctx.strokeStyle = isCyber ? 'rgba(6, 182, 212, 0.22)' : (isClay ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.12)');
       ctx.lineWidth = 0.8 * zoom;
       ctx.beginPath();
-      for (let my = -16; my <= -6; my += 3) {
-        ctx.moveTo(p.x - 5 * zoom, p.y + my * zoom);
-        ctx.lineTo(p.x + 5 * zoom, p.y + my * zoom);
+      for (let my = -5; my <= 5; my += 3) {
+        ctx.moveTo(-5 * zoom, my * zoom);
+        ctx.lineTo(5 * zoom, my * zoom);
       }
       ctx.stroke();
 
@@ -2410,18 +2411,19 @@
         ctx.strokeStyle = isCyber ? '#38bdf8' : (isClay ? '#94a3b8' : '#cbd5e1');
         ctx.lineWidth = 1.6 * zoom;
         ctx.beginPath();
-        ctx.moveTo(p.x, p.y - 18 * zoom);
-        ctx.lineTo(p.x, p.y - 21.5 * zoom);
+        ctx.moveTo(0, -7 * zoom);
+        ctx.lineTo(0, -11 * zoom);
         ctx.stroke();
 
         ctx.fillStyle = isCyber ? '#020617' : (isClay ? '#ffffff' : '#0f172a');
         ctx.beginPath();
-        ctx.roundRect(p.x - 5 * zoom, p.y - 24.5 * zoom, 10 * zoom, 4 * zoom, 2 * zoom);
+        ctx.roundRect(-5 * zoom, -14 * zoom, 10 * zoom, 4 * zoom, 2 * zoom);
         ctx.fill();
         ctx.strokeStyle = seatBorder;
         ctx.lineWidth = 1 * zoom;
         ctx.stroke();
       }
+      ctx.restore();
     }
 
     // --- 6. Dedicated Room Fixtures & Environmental Components (Unified 2.5D Depth Sorted) ---
@@ -3829,6 +3831,13 @@
       const torsoH = 13 * zoom;
       const shoulderY = ty - 4 * zoom;
 
+      // When seated at workstation, angle shoulders and torso parallel to the office and desk angle
+      if (isSeated) {
+        ctx.translate(tx, shoulderY + 5 * zoom);
+        ctx.rotate(ROOM_ANGLE);
+        ctx.translate(-tx, -(shoulderY + 5 * zoom));
+      }
+
       // Neck with Realistic Chin Shadow
       const neckW = 5.2 * zoom;
       const neckH = 4.2 * zoom;
@@ -4126,39 +4135,39 @@
     function drawSeatedAgent(agent, seatCoord, desk) {
       const sp = isoToScreen(seatCoord.x, seatCoord.y, 0);
       const dp = desk ? isoToScreen(desk.x, desk.y, 0) : null;
-      // Exact horizontal centering on table centerline
-      const charX = dp ? dp.x : sp.x;
+      // Exact alignment on seat position (centered with desk centerline)
+      const charX = sp.x;
       const isSelected = selectedAgent && selectedAgent.id === agent.id;
       const isHovered = hoveredAgent && hoveredAgent.id === agent.id;
       const isWorking = agent.isWorking;
       const isClay = visualTheme === 'clay';
       const isCyber = visualTheme === 'cyber';
 
-      // Floor Selection / Hover Halo around chair base
+      // Floor Selection / Hover Halo around chair base (Parallel to Room Angle)
       if (isSelected || isHovered) {
         ctx.strokeStyle = isSelected ? '#38bdf8' : '#a855f7';
         ctx.lineWidth = 2 * zoom;
         ctx.beginPath();
-        ctx.ellipse(charX, sp.y + 5 * zoom, 16 * zoom, 9 * zoom, 0, 0, Math.PI * 2);
+        ctx.ellipse(charX, sp.y + 5 * zoom, 16 * zoom, 9 * zoom, ROOM_ANGLE, 0, Math.PI * 2);
         ctx.stroke();
       }
 
-      // Active Worker Radar Beacon on floor around chair
+      // Active Worker Radar Beacon on floor around chair (Parallel to Room Angle)
       if (isWorking) {
         const pulse = (globalTick * 0.06) % 1;
         ctx.strokeStyle = `rgba(16, 185, 129, ${1 - pulse})`;
         ctx.lineWidth = 2 * zoom;
         ctx.beginPath();
-        ctx.ellipse(charX, sp.y + 5 * zoom, (14 + pulse * 18) * zoom, (7 + pulse * 9) * zoom, 0, 0, Math.PI * 2);
+        ctx.ellipse(charX, sp.y + 5 * zoom, (14 + pulse * 18) * zoom, (7 + pulse * 9) * zoom, ROOM_ANGLE, 0, Math.PI * 2);
         ctx.stroke();
       }
 
-      // Seated natural breathing & focus typing bobs
+      // Seated natural breathing & focus typing bobs (elevated so chest, neck, head & outfit are clearly visible behind table)
       const breatheBob = (isWorking) ? Math.sin(globalTick * 0.08) * 0.7 * zoom : 0;
       const typeBob = (agent.state === 'coding' && isWorking) ? Math.sin(globalTick * 0.25 * simSpeed) * 0.8 * zoom : 0;
-      const cy = sp.y - 18 * zoom + breatheBob + typeBob;
+      const cy = sp.y - 19.5 * zoom + breatheBob + typeBob;
 
-      // 1. Render Stylized 3D Torso, Shoulders & Specialist Outfit
+      // 1. Render Stylized 3D Torso, Shoulders & Specialist Outfit (Parallel to Room Angle)
       drawStylizedTorsoAndOutfits(ctx, agent, charX, cy, isClay, isCyber, isWorking, true);
 
       // 2. Render Stylized 3D Head, Face, Expressive Gaze & Headgear
@@ -4485,10 +4494,10 @@
       }
 
       // 2. Custom Backlit Mechanical Keyboard & Mouse (In Front of Agent at North edge)
-      const kNW = isoToScreen(desk.x - 0.20, desk.y - 0.24, tableZ + 0.5);
-      const kNE = isoToScreen(desk.x + 0.14, desk.y - 0.24, tableZ + 0.5);
-      const kSE = isoToScreen(desk.x + 0.14, desk.y - 0.05, tableZ + 0.5);
-      const kSW = isoToScreen(desk.x - 0.20, desk.y - 0.05, tableZ + 0.5);
+      const kNW = isoToScreen(desk.x - 0.18, desk.y - 0.20, tableZ + 0.5);
+      const kNE = isoToScreen(desk.x + 0.18, desk.y - 0.20, tableZ + 0.5);
+      const kSE = isoToScreen(desk.x + 0.18, desk.y - 0.04, tableZ + 0.5);
+      const kSW = isoToScreen(desk.x - 0.18, desk.y - 0.04, tableZ + 0.5);
 
       ctx.fillStyle = '#1e293b';
       ctx.beginPath();
@@ -4579,8 +4588,8 @@
       const leftTapZ = (isWorking && Math.sin(globalTick * speedFactor) > 0) ? 0.3 : 0;
       const rightTapZ = (isWorking && Math.cos(globalTick * speedFactor) > 0) ? 0.3 : 0;
 
-      const leftWrist = isoToScreen(desk.x - 0.12, desk.y - 0.14, tableZ + 0.8 + leftTapZ);
-      const rightWrist = isoToScreen(desk.x + 0.06, desk.y - 0.14, tableZ + 0.8 + rightTapZ);
+      const leftWrist = isoToScreen(desk.x - 0.10, desk.y - 0.12, tableZ + 0.8 + leftTapZ);
+      const rightWrist = isoToScreen(desk.x + 0.08, desk.y - 0.12, tableZ + 0.8 + rightTapZ);
 
       // Sleeves
       ctx.fillStyle = sleeveColor;
