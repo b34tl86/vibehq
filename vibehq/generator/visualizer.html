@@ -383,7 +383,7 @@
     // Dedicated Specialist Desks (Permanent Core Squad):
     const DESK_SLOTS = [
       { x: 11.5, y: 3.5,  seatX: 11.22, seatY: 3.22,  name: "Executive Lead Desk", zone: "executive", agentName: "Claude" },
-      { x: 5.6,  y: 16.0, seatX: 5.25,  seatY: 15.65, name: "Front Reception Desk", zone: "reception", agentName: "Tally" },
+      { x: 5.8,  y: 16.0, seatX: 5.45,  seatY: 15.65, name: "Front Reception Desk", zone: "reception", agentName: "Tally" },
       { x: 18.0, y: 10.0, seatX: 17.72, seatY: 9.72,  name: "QA Lab Desk", zone: "qaLab", agentName: "Victor" },
       { x: 4.0,  y: 10.0, seatX: 3.72,  seatY: 9.72,  name: "UI Design Lead Desk", zone: "uiStudio", agentName: "Ava" },
       { x: 10.0, y: 10.0, seatX: 9.72,  seatY: 9.72,  name: "Backend Core Desk", zone: "bullpen", agentName: "Felix" },
@@ -417,9 +417,9 @@
 
       // 2. Horizontal Glass Walls along y = 13.5 (Dividing Middle row from South row)
       { id: 'wall_studio_lounge',    x1: 0.5, y1: 13.5, x2: 4.5, y2: 13.5, doorPos: 2.5, doorW: 1.8, label: 'STUDIO / LOUNGE' },
-      { id: 'wall_studio_reception', x1: 4.5, y1: 13.5, x2: 7.5, y2: 13.5, doorPos: 6.0, doorW: 1.5, label: 'STUDIO / RECEPTION' },
+      { id: 'wall_studio_reception', x1: 4.5, y1: 13.5, x2: 7.5, y2: 13.5, doorPos: 4.8, doorW: 1.4, label: 'STUDIO / RECEPTION' },
       { id: 'wall_bullpen_cowork',   x1: 7.5, y1: 13.5, x2: 15.5, y2: 13.5, doorPos: 11.5, doorW: 2.2, label: 'DEV / CO-WORKING' },
-      { id: 'wall_qa_meeting',       x1: 15.5, y1: 13.5, x2: 23.5, y2: 13.5, doorPos: 19.5, doorW: 1.6, label: 'QA / BOARDROOM' },
+      { id: 'wall_qa_meeting',       x1: 15.5, y1: 13.5, x2: 23.5, y2: 13.5, doorPos: 16.8, doorW: 1.6, label: 'QA / BOARDROOM' },
 
       // 3. Vertical Glass Walls along x = 7.5 (Pantry/Studio/Reception vs Executive/Bullpen/LongTable)
       { id: 'wall_pantry_exec',       x1: 7.5, y1: 0.5, x2: 7.5, y2: 6.5, doorPos: 3.5, doorW: 1.6, label: 'PANTRY / EXECUTIVE' },
@@ -453,18 +453,18 @@
       { x: 14.0, y: 16.6, seatX: 13.91, seatY: 15.61, name: "Long Table Head Seat B", zone: "partTimerStudio", isLongTable: true, seatIndex: 7, facing: 'west' },
 
       // 2. Meeting Room Conference Seats
-      { x: 18.0, y: 15.5, seatX: 17.8, seatY: 15.3, name: "Meeting Room Chair 1", zone: "meetingRoom", facing: 'south' },
-      { x: 21.0, y: 15.5, seatX: 20.8, seatY: 15.3, name: "Meeting Room Chair 2", zone: "meetingRoom", facing: 'south' },
-      { x: 18.0, y: 17.5, seatX: 18.2, seatY: 17.7, name: "Meeting Room Chair 3", zone: "meetingRoom", facing: 'north' },
-      { x: 21.0, y: 17.5, seatX: 21.2, seatY: 17.7, name: "Meeting Room Chair 4", zone: "meetingRoom", facing: 'north' },
+      { x: 18.0, y: 15.8, seatX: 17.8, seatY: 15.6, name: "Meeting Room Chair 1", zone: "meetingRoom", facing: 'south' },
+      { x: 21.0, y: 15.8, seatX: 20.8, seatY: 15.6, name: "Meeting Room Chair 2", zone: "meetingRoom", facing: 'south' },
+      { x: 18.0, y: 17.8, seatX: 18.2, seatY: 18.0, name: "Meeting Room Chair 3", zone: "meetingRoom", facing: 'north' },
+      { x: 21.0, y: 17.8, seatX: 21.2, seatY: 18.0, name: "Meeting Room Chair 4", zone: "meetingRoom", facing: 'north' },
 
       // 3. The Pantry Bistro & Break Seating
       { x: 2.5,  y: 4.8,  seatX: 2.5,  seatY: 4.8,  name: "Pantry Bistro Stool 1", zone: "pantry", facing: 'east' },
       { x: 5.2,  y: 3.2,  seatX: 5.2,  seatY: 3.2,  name: "Pantry Espresso Bar Stool", zone: "pantry", facing: 'south' },
 
       // 4. Waiting Room Open Lounge Seating
-      { x: 2.2,  y: 16.2, seatX: 2.2,  seatY: 16.2, name: "Waiting Lounge Sectional Seat", zone: "waitingRoom", facing: 'south' },
-      { x: 3.8,  y: 18.2, seatX: 3.8,  seatY: 18.2, name: "Waiting Lounge Accent Armchair", zone: "waitingRoom", facing: 'north' },
+      { x: 2.2,  y: 15.6, seatX: 2.2,  seatY: 15.6, name: "Waiting Lounge Sectional Seat", zone: "waitingRoom", facing: 'south' },
+      { x: 2.4,  y: 18.2, seatX: 2.4,  seatY: 18.2, name: "Waiting Lounge Accent Armchair", zone: "waitingRoom", facing: 'north' },
     ];
 
     // Room POIs & Interactive Prop Targets:
@@ -472,7 +472,7 @@
       coffeeMachine: { x: 2.8, y: 2.8, label: 'Espresso Bar' },
       waterCooler: { x: 5.5, y: 2.0, label: 'Water Dispenser' },
       pantrySnackCounter: { x: 1.5, y: 4.2, label: 'Pantry Snack Bar' },
-      pantryLounge: { x: 5.0, y: 4.8, label: 'Cafe High-Top' },
+      pantryLounge: { x: 5.0, y: 4.5, label: 'Cafe High-Top' },
       whiteboard: { x: 11.5, y: 1.0, label: 'Architecture Board' },
       blueprintTable: { x: 8.5, y: 2.5, label: 'Drafting Table' },
       avaEasel: { x: 2.0, y: 8.0, label: 'UI Style Easel' },
@@ -485,15 +485,15 @@
       serverRack5: { x: 21.0, y: 4.5, label: 'Storage SAN Backup' },
       kanban: { x: 11.0, y: 7.2, label: 'Sprint Kanban' },
       socRadar: { x: 21.5, y: 7.8, label: 'Threat Radar' },
-      waitingLoungeSofa: { x: 2.2, y: 16.2, label: 'Waiting Lounge Sofa' },
-      loungeSofa: { x: 2.2, y: 16.2, label: 'Waiting Lounge Sofa' }, // alias
-      waitingCoffeeTable: { x: 3.0, y: 17.5, label: 'Lounge Coffee Table' },
-      waitingArmchair: { x: 3.8, y: 18.2, label: 'Accent Armchair' },
-      receptionDesk: { x: 5.6, y: 16.0, label: 'Front Reception' },
-      logoWall: { x: 5.6, y: 13.6, label: 'Keevah Logo Wall' },
+      waitingLoungeSofa: { x: 2.2, y: 15.6, label: 'Waiting Lounge Sofa' },
+      loungeSofa: { x: 2.2, y: 15.6, label: 'Waiting Lounge Sofa' }, // alias
+      waitingCoffeeTable: { x: 2.8, y: 17.0, label: 'Lounge Coffee Table' },
+      waitingArmchair: { x: 2.4, y: 18.2, label: 'Accent Armchair' },
+      receptionDesk: { x: 5.8, y: 16.0, label: 'Front Reception' },
+      logoWall: { x: 5.8, y: 13.8, label: 'Keevah Logo Wall' },
       partTimerLongTable: { x: 11.5, y: 16.6, label: 'Part-Timer Long Table' },
-      confTable: { x: 19.5, y: 16.5, label: 'Conference Table' },
-      meetingScreen: { x: 19.5, y: 14.1, label: 'Meeting Presentation Wall' },
+      confTable: { x: 19.5, y: 16.8, label: 'Conference Table' },
+      meetingScreen: { x: 20.5, y: 14.1, label: 'Meeting Presentation Wall' },
     };
 
     // Primary Orchestrator (Claude Lead)
@@ -2103,10 +2103,9 @@
       }
     }
 
-    // --- 6. Room Fixtures, Environmental Props & Animated Life ---
-    function renderRoomFixtures() {
+    // --- 6. Dedicated Room Fixtures & Environmental Components (Unified 2.5D Depth Sorted) ---
+    function drawDataVaultFixtures() {
       // 1. Dedicated Enclosed Server Room (Data Center Core // Cold Aisle Matrix)
-      // All enterprise server cabinets consolidated into this single secure vault:
       const serverRacks = [
         POIS.serverRack1,
         POIS.serverRack2,
@@ -2177,7 +2176,7 @@
         ctx.stroke();
       });
 
-      // In-Row CRAC Precision Air Conditioning Chiller Unit (x: 13.6, y: 3.5)
+      // In-Row CRAC Precision Air Conditioning Chiller Unit (x: 17.5, y: 4.5)
       const cpP = isoToScreen(POIS.serverCooler.x, POIS.serverCooler.y, 0);
       drawIsometricBox(POIS.serverCooler.x, POIS.serverCooler.y, 0.9, 0.9, 56, '#0f172a', '#020617', '#020617');
       // Chiller front intake grille
@@ -2234,7 +2233,9 @@
       ctx.textAlign = 'center';
       ctx.fillText('TEMP: 18.2°C | 40% RH', emp.x, emp.y - 50 * zoom);
       ctx.fillText('PUE: 1.12 | 10G CORE', emp.x, emp.y - 44 * zoom);
+    }
 
+    function drawPantryFixtures() {
       // 2. Café & Lounge: Commercial La Marzocco Dual-Boiler Espresso Bar
       const cp = isoToScreen(POIS.coffeeMachine.x, POIS.coffeeMachine.y, 0);
       const barY = cp.y - 25 * zoom;
@@ -2375,8 +2376,8 @@
       // 2B. The Pantry Refreshment & Snack Station (x: 1.5, y: 4.2)
       drawPantrySnackStation();
 
-      // 3. Mid-Century Eames Lounge Chair & Ottoman in Reading Nook (x: 4.8, y: 4.8)
-      const eamesP = isoToScreen(4.8, 4.8, 0);
+      // 3. Mid-Century Eames Lounge Chair & Ottoman in Reading Nook (x: 5.0, y: 4.5)
+      const eamesP = isoToScreen(POIS.pantryLounge.x, POIS.pantryLounge.y, 0);
       // Floor contact shadow
       ctx.fillStyle = 'rgba(0, 0, 0, 0.28)';
       ctx.beginPath();
@@ -2413,68 +2414,14 @@
       ctx.fillRect(eamesP.x - 2 * zoom, eamesP.y - 8 * zoom, 1.5 * zoom, 1.5 * zoom);
       ctx.fillRect(eamesP.x + 1 * zoom, eamesP.y - 8 * zoom, 1.5 * zoom, 1.5 * zoom);
 
-      // Eames Ottoman Footrest nearby (x: 4.0, y: 5.2)
-      const ottP = isoToScreen(4.0, 5.2, 0);
+      // Eames Ottoman Footrest nearby (x: 4.2, y: 5.0)
+      const ottP = isoToScreen(POIS.pantryLounge.x - 0.8, POIS.pantryLounge.y + 0.5, 0);
       ctx.fillStyle = '#78350f'; // Walnut shell
       ctx.fillRect(ottP.x - 6 * zoom, ottP.y - 6 * zoom, 12 * zoom, 5 * zoom);
       ctx.fillStyle = '#0f172a'; // Leather cushion
       ctx.fillRect(ottP.x - 5 * zoom, ottP.y - 8 * zoom, 10 * zoom, 4 * zoom);
 
-      // 4. Curved Tufted Modern Velvet Sectional Sofa with Brass Legs & Throw Blanket
-      const spP = isoToScreen(POIS.loungeSofa.x, POIS.loungeSofa.y, 0);
-
-      // Soft floor contact shadow
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.28)';
-      ctx.beginPath();
-      ctx.ellipse(spP.x, spP.y + 12 * zoom, 34 * zoom, 16 * zoom, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Tapered Walnut Legs with Brass Ferrules
-      ctx.fillStyle = '#451a03';
-      ctx.fillRect(spP.x - 22 * zoom, spP.y + 7 * zoom, 3 * zoom, 6 * zoom);
-      ctx.fillRect(spP.x + 19 * zoom, spP.y + 7 * zoom, 3 * zoom, 6 * zoom);
-      ctx.fillStyle = '#f59e0b';
-      ctx.fillRect(spP.x - 22 * zoom, spP.y + 11 * zoom, 3 * zoom, 2 * zoom);
-      ctx.fillRect(spP.x + 19 * zoom, spP.y + 11 * zoom, 3 * zoom, 2 * zoom);
-
-      // Curved Pillowed Seat Cushion
-      ctx.fillStyle = '#0284c7';
-      ctx.beginPath();
-      ctx.roundRect(spP.x - 25 * zoom, spP.y - 12 * zoom, 50 * zoom, 20 * zoom, 8 * zoom);
-      ctx.fill();
-      ctx.strokeStyle = '#0369a1';
-      ctx.lineWidth = 1 * zoom;
-      ctx.stroke();
-
-      // Curved Backrest Cushion
-      ctx.fillStyle = '#0369a1';
-      ctx.beginPath();
-      ctx.roundRect(spP.x - 24 * zoom, spP.y - 25 * zoom, 48 * zoom, 15 * zoom, 7 * zoom);
-      ctx.fill();
-
-      // Button Tufting on Backrest
-      ctx.fillStyle = '#082f49';
-      for (let t = 0; t < 5; t++) {
-        ctx.fillRect(spP.x - 16 * zoom + t * 8 * zoom, spP.y - 19 * zoom, 2 * zoom, 2 * zoom);
-      }
-
-      // Mustard Accent Throw Cushion
-      ctx.fillStyle = '#f59e0b';
-      ctx.beginPath();
-      ctx.roundRect(spP.x - 18 * zoom, spP.y - 20 * zoom, 8 * zoom, 8 * zoom, 2 * zoom);
-      ctx.fill();
-
-      // Plaid Wool Throw Blanket draped over armrest
-      ctx.fillStyle = '#f1f5f9';
-      ctx.beginPath();
-      ctx.roundRect(spP.x + 12 * zoom, spP.y - 15 * zoom, 10 * zoom, 14 * zoom, 2 * zoom);
-      ctx.fill();
-      ctx.strokeStyle = '#0284c7';
-      ctx.lineWidth = 0.8 * zoom;
-      ctx.stroke();
-
-      // 5. Indoor Botanicals: Fiddle Leaf Fig & Monstera Deliciosa (Architectural Pots, Zero Diamond Rhombus)
-      // A. Potted Monstera Deliciosa in Fluted Cylinder Ceramic Planter (x: 5.2, y: 1.5)
+      // 4. Potted Monstera Deliciosa in Fluted Cylinder Ceramic Planter (x: 5.2, y: 1.5)
       const plP1 = isoToScreen(5.2, 1.5, 0);
       ctx.fillStyle = 'rgba(0, 0, 0, 0.22)';
       ctx.beginPath();
@@ -2503,8 +2450,10 @@
         ctx.fillStyle = isNightMode ? '#020617' : '#ffffff';
         ctx.fillRect(lx - 1 * zoom, ly - 1 * zoom, 2 * zoom, 2 * zoom);
       }
+    }
 
-      // B. Fiddle Leaf Fig Tree in Fluted Terracotta Planter (x: 1.5, y: 10.5)
+    function drawAvaStudioFixtures() {
+      // 1. Fiddle Leaf Fig Tree in Fluted Terracotta Planter (x: 1.5, y: 10.5)
       const flfP = isoToScreen(1.5, 10.5, 0);
       ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
       ctx.beginPath();
@@ -2543,7 +2492,7 @@
         ctx.fill();
       }
 
-      // 6. Ava's UI Style Easel in Studio
+      // 2. Ava's UI Style Easel in Studio
       const ep = isoToScreen(POIS.avaEasel.x, POIS.avaEasel.y, 0);
       ctx.strokeStyle = '#b45309';
       ctx.lineWidth = 2.2 * zoom;
@@ -2582,8 +2531,10 @@
         ctx.arc(ep.x - 12 * zoom + sIdx * 8 * zoom, ep.y - 27 * zoom, 2.5 * zoom, 0, Math.PI * 2);
         ctx.fill();
       });
+    }
 
-      // 7. Hunter's High-Tech Threat Radar Terminal in Cyber SOC
+    function drawSocRadarFixture() {
+      // Hunter's High-Tech Threat Radar Terminal in Cyber SOC
       const sdp = isoToScreen(POIS.socRadar.x, POIS.socRadar.y, 0);
       // Floor shadow
       ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
@@ -2629,8 +2580,17 @@
         ctx.arc(radarCenterX + 5 * zoom, radarCenterY - 4 * zoom, 1.8 * zoom, 0, Math.PI * 2);
         ctx.fill();
       }
+    }
 
-      // 8. Conference & Meeting Room Modern Racetrack Oval Boardroom Table & Polycom
+    function drawConferenceTableFixtures() {
+      // 1. North-row chairs behind table (occluded by table slab)
+      EXTRA_SEATS.forEach(seat => {
+        if (seat.zone === 'meetingRoom' && seat.facing === 'south') {
+          drawErgonomicMeshChair(seat.seatX || seat.x, seat.seatY || seat.y, 'south', true, false);
+        }
+      });
+
+      // 2. Conference & Meeting Room Modern Racetrack Oval Boardroom Table & Polycom
       const ctp = isoToScreen(POIS.confTable.x, POIS.confTable.y, 0);
       const isCyber = visualTheme === 'cyber';
       const isClay = visualTheme === 'clay';
@@ -2713,30 +2673,35 @@
       ctx.fillRect(ctp.x - 3.5 * zoom, ctp.y - 30 * zoom, 2.8 * zoom, 5.5 * zoom);
       ctx.fillRect(ctp.x + 1 * zoom, ctp.y - 28 * zoom, 1.8 * zoom, 2.8 * zoom);
 
-      // 8B. Conference & Meeting Room Presentation Video Wall (x: 19.5, y: 14.1)
-      drawMeetingPresentationWall();
+      // 3. South-row chairs in front of table
+      EXTRA_SEATS.forEach(seat => {
+        if (seat.zone === 'meetingRoom' && seat.facing === 'north') {
+          drawErgonomicMeshChair(seat.seatX || seat.x, seat.seatY || seat.y, 'north', true, false);
+        }
+      });
+    }
 
-      // 9A. North-row chairs behind Long Table (drawn before table so table slab occludes legs)
+    function drawPartTimerWorkbenchFixtures() {
+      // 1. North-row chairs behind Long Table (drawn before table so table slab occludes legs)
       EXTRA_SEATS.forEach(seat => {
         if (seat.isLongTable && seat.facing === 'south') {
           drawErgonomicMeshChair(seat.seatX || seat.x, seat.seatY || seat.y, 'south', false, false);
         }
       });
 
-      // 9B. Dedicated Communal Long Table Workbench for Part-Timers (Part-Timer Studio)
+      // 2. Dedicated Communal Long Table Workbench for Part-Timers (Part-Timer Studio)
       drawPartTimerLongTable();
 
-      // 10. South-row, Head, Meeting Room & Pantry Chairs (drawn in front of table)
+      // 3. South-row and Head chairs
       EXTRA_SEATS.forEach(seat => {
-        if (seat.isLongTable && seat.facing === 'south') return; // already drawn behind table
-        if (seat.zone === 'waitingRoom') return; // handled by drawWaitingRoomLounge
-        const isMeeting = seat.zone === 'meetingRoom';
-        drawErgonomicMeshChair(seat.seatX || seat.x, seat.seatY || seat.y, seat.facing || 'south', isMeeting, false);
+        if (seat.isLongTable && seat.facing !== 'south') {
+          drawErgonomicMeshChair(seat.seatX || seat.x, seat.seatY || seat.y, seat.facing || 'north', false, false);
+        }
       });
-
-      // 11. Waiting Room Open Space Lounge
-      drawWaitingRoomLounge();
     }
+
+    // Maintained for backward compatibility; actual rendering is now depth-sorted in renderWorkstationsAndAgents
+    function renderRoomFixtures() {}
 
     // --- Presentation Video Wall in Meeting Room ---
     function drawMeetingPresentationWall() {
@@ -5331,6 +5296,21 @@
         });
       });
 
+      // 5. Environmental Room Fixtures (Unified 2.5D Depth Sorted with Glass Partition Walls!)
+      // North Row Fixtures (BEHIND glass wall y = 6.5, depth < 18):
+      sceneItems.push({ type: 'pantryBar', depth: POIS.coffeeMachine.x + POIS.coffeeMachine.y });
+      sceneItems.push({ type: 'serverRoom', depth: POIS.serverRack1.x + POIS.serverRack1.y });
+
+      // Middle Row Fixtures:
+      sceneItems.push({ type: 'avaStudio', depth: POIS.avaEasel.x + POIS.avaEasel.y });
+      sceneItems.push({ type: 'socRadar', depth: POIS.socRadar.x + POIS.socRadar.y });
+
+      // South Row Fixtures (IN FRONT OF glass wall y = 13.5, depth > 16):
+      sceneItems.push({ type: 'waitingRoomLounge', depth: POIS.waitingLoungeSofa.x + POIS.waitingLoungeSofa.y });
+      sceneItems.push({ type: 'partTimerLongTable', depth: POIS.partTimerLongTable.x + POIS.partTimerLongTable.y });
+      sceneItems.push({ type: 'meetingPresentationWall', depth: POIS.meetingScreen.x + POIS.meetingScreen.y });
+      sceneItems.push({ type: 'conferenceTable', depth: POIS.confTable.x + POIS.confTable.y });
+
       sceneItems.sort((a, b) => a.depth - b.depth);
 
       sceneItems.forEach(item => {
@@ -5342,6 +5322,22 @@
           drawWalkingAgent(item.agent);
         } else if (item.type === 'glassWall') {
           drawGlassPartitionWall(item.wall);
+        } else if (item.type === 'pantryBar') {
+          drawPantryFixtures();
+        } else if (item.type === 'serverRoom') {
+          drawDataVaultFixtures();
+        } else if (item.type === 'avaStudio') {
+          drawAvaStudioFixtures();
+        } else if (item.type === 'socRadar') {
+          drawSocRadarFixture();
+        } else if (item.type === 'waitingRoomLounge') {
+          drawWaitingRoomLounge();
+        } else if (item.type === 'partTimerLongTable') {
+          drawPartTimerWorkbenchFixtures();
+        } else if (item.type === 'meetingPresentationWall') {
+          drawMeetingPresentationWall();
+        } else if (item.type === 'conferenceTable') {
+          drawConferenceTableFixtures();
         }
       });
 
@@ -6776,7 +6772,6 @@
           renderTopDownView();
         } else {
           renderOfficeFloor();
-          renderRoomFixtures();
           renderWorkstationsAndAgents();
           updateAndRenderParticles();
           renderAtmosphericLighting();
