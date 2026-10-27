@@ -364,6 +364,7 @@
     const GRID_H = 20;
     const TILE_W = 64;
     const TILE_H = 38;
+    const ROOM_ANGLE = Math.atan2(TILE_H, TILE_W); // 0.5353457 rad (~30.672 deg) - Exact 3D isometric room angle
 
     // Room boundaries (10 Dedicated Functional Corporate Zones across 24x20 Grid):
     const ROOMS = {
@@ -1038,11 +1039,15 @@
       floorDecals.forEach(d => {
         const dp = isoToScreen(d.x, d.y, 0);
         ctx.save();
-        ctx.font = `bold ${Math.max(9, 9.5 * zoom)}px "JetBrains Mono", monospace`;
+        ctx.translate(dp.x, dp.y);
+        ctx.rotate(ROOM_ANGLE);
+        ctx.font = `bold ${Math.max(8.5, 9 * zoom)}px "JetBrains Mono", monospace`;
         ctx.fillStyle = visualTheme === 'cyber' 
           ? `${d.color}90` 
           : (visualTheme === 'clay' ? '#475569' : (isNightMode ? `${d.color}50` : `${d.color}90`));
-        ctx.fillText(d.label, dp.x - 30 * zoom, dp.y);
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(d.label, 0, 0);
         ctx.restore();
       });
 
@@ -1200,8 +1205,8 @@
       const signConfigs = [
         { label: 'EXECUTIVE // CLAUDE', x: 11.5, y: 0, color: '#f59e0b' },
         { label: 'DATA VAULT // SERVER CORE', x: 19.5, y: 0, color: '#06b6d4' },
-        { label: 'UI/UX STUDIO // AVA', x: 0, y: 10.0, color: '#f43f5e' },
-        { label: 'WAITING LOUNGE', x: 0, y: 16.5, color: '#14b8a6' },
+        { label: 'UI/UX STUDIO // AVA', x: 0, y: 10.0, color: '#f43f5e', wall: 'W' },
+        { label: 'WAITING LOUNGE', x: 0, y: 16.5, color: '#14b8a6', wall: 'W' },
         { label: 'CONFERENCE // BOARDROOM', x: 16.0, y: 14.0, color: '#8b5cf6', isTotem: true }
       ];
 
@@ -1213,7 +1218,6 @@
         const signW = textW + 12 * zoom;
         const signH = 14 * zoom;
 
-        let signX = sp.x - signW / 2;
         let signY;
 
         if (sign.isTotem) {
@@ -1228,15 +1232,21 @@
           ctx.beginPath();
           ctx.roundRect(sp.x - 3 * zoom, sp.y - 28 * zoom, 6 * zoom, 30 * zoom, 2 * zoom);
           ctx.fill();
-          signY = sp.y - 42 * zoom;
+          signY = sp.y - 35 * zoom;
         } else {
-          signY = sp.y - wallH + 18 * zoom;
+          signY = sp.y - wallH + 25 * zoom;
         }
+
+        const isWestWall = (sign.x === 0 || sign.wall === 'W');
+        const signAngle = sign.isTotem ? ROOM_ANGLE : (isWestWall ? -ROOM_ANGLE : ROOM_ANGLE);
+
+        ctx.translate(sp.x, signY);
+        ctx.rotate(signAngle);
 
         // Sign acrylic background plate
         ctx.fillStyle = isNightMode ? 'rgba(15, 23, 42, 0.92)' : 'rgba(255, 255, 255, 0.92)';
         ctx.beginPath();
-        ctx.roundRect(signX, signY, signW, signH, 3 * zoom);
+        ctx.roundRect(-signW / 2, -signH / 2, signW, signH, 3 * zoom);
         ctx.fill();
 
         // Neon border & glow
@@ -1247,7 +1257,7 @@
         ctx.fillStyle = sign.color;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(sign.label, signX + signW / 2, signY + signH / 2);
+        ctx.fillText(sign.label, 0, 0);
         ctx.restore();
       });
 
@@ -1518,10 +1528,10 @@
       };
     }
 
-    function drawAngledText(targetCtx, text, pt, font, fillStyle, align = 'left') {
+    function drawAngledText(targetCtx, text, pt, font, fillStyle, align = 'left', customAngle = null) {
       targetCtx.save();
       targetCtx.translate(pt.x, pt.y);
-      targetCtx.rotate(0.4636476); // Math.atan2(16, 32) = 26.565 degrees (Exact 3D Isometric Slope)
+      targetCtx.rotate(customAngle !== null ? customAngle : ROOM_ANGLE); // Exact 3D Isometric Wall & Room Angle: Math.atan2(TILE_H, TILE_W)
       targetCtx.font = font;
       targetCtx.fillStyle = fillStyle;
       targetCtx.textAlign = align;
@@ -2532,18 +2542,6 @@
       ctx.arc(fireP.x, fireP.y - 42 * zoom, 2.2 * zoom, 0, Math.PI * 2);
       ctx.fill();
 
-      // Master Environmental NOC Telemetry Board in Server Room
-      const emp = isoToScreen(17.2, 2.5, 0);
-      ctx.fillStyle = '#020617';
-      ctx.fillRect(emp.x - 18 * zoom, emp.y - 58 * zoom, 36 * zoom, 16 * zoom);
-      ctx.strokeStyle = '#06b6d4';
-      ctx.lineWidth = 1 * zoom;
-      ctx.strokeRect(emp.x - 18 * zoom, emp.y - 58 * zoom, 36 * zoom, 16 * zoom);
-      ctx.fillStyle = '#22d3ee';
-      ctx.font = `bold ${Math.max(6, 6.5 * zoom)}px monospace`;
-      ctx.textAlign = 'center';
-      ctx.fillText('TEMP: 18.2°C | 40% RH', emp.x, emp.y - 50 * zoom);
-      ctx.fillText('PUE: 1.12 | 10G CORE', emp.x, emp.y - 44 * zoom);
     }
 
     function drawPantryFixtures() {
@@ -3320,11 +3318,13 @@
       // 6. Part-Timer Studio Signage Plaque at table front
       const pPlaque = isoToScreen(11.5, 17.3, 0);
       ctx.save();
+      ctx.translate(pPlaque.x, pPlaque.y + 12 * zoom);
+      ctx.rotate(ROOM_ANGLE);
       ctx.font = `bold ${Math.max(6.5, 7.5 * zoom)}px "JetBrains Mono", monospace`;
       ctx.fillStyle = isCyber ? '#a855f7' : (isClay ? '#64748b' : '#94a3b8');
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('PART-TIMER COMMUNAL WORKBENCH // 8-SEAT POD', pPlaque.x, pPlaque.y + 12 * zoom);
+      ctx.fillText('PART-TIMER COMMUNAL WORKBENCH // 8-SEAT POD', 0, 0);
       ctx.restore();
     }
 
@@ -4513,7 +4513,7 @@
       const mouseP = isoToScreen(desk.x + 0.25, desk.y + 0.08, tableZ + 0.5);
       ctx.fillStyle = '#475569';
       ctx.beginPath();
-      ctx.ellipse(mouseP.x, mouseP.y, 2.2 * zoom, 1.6 * zoom, 0.46, 0, Math.PI * 2);
+      ctx.ellipse(mouseP.x, mouseP.y, 2.2 * zoom, 1.6 * zoom, ROOM_ANGLE, 0, Math.PI * 2);
       ctx.fill();
 
       // 3. Seated Agent Hands Typing on the Keyboard
