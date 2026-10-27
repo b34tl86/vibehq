@@ -4348,9 +4348,9 @@
       const tableZ = 15.0;
 
       // 1. Dual Flanking Monitors (Left & Right Wings - CENTER CORRIDOR REMAINS 100% UNOBSTRUCTED FOR AGENT)
-      // Left Monitor Stand & Screen
-      const lStandBase = isoToScreen(desk.x - 0.50, desk.y - 0.12, tableZ);
-      const lStandTop = isoToScreen(desk.x - 0.50, desk.y - 0.12, tableZ + 3);
+      // Left Monitor Stand & Screen (Moved forward away from seated agent)
+      const lStandBase = isoToScreen(desk.x - 0.58, desk.y + 0.14, tableZ);
+      const lStandTop = isoToScreen(desk.x - 0.58, desk.y + 0.14, tableZ + 3);
       ctx.strokeStyle = isCyber ? '#334155' : (isClay ? '#94a3b8' : '#475569');
       ctx.lineWidth = 2.5 * zoom;
       ctx.beginPath();
@@ -4358,19 +4358,19 @@
       ctx.lineTo(lStandTop.x, lStandTop.y);
       ctx.stroke();
 
-      // Right Monitor Stand & Screen
-      const rStandBase = isoToScreen(desk.x + 0.50, desk.y - 0.12, tableZ);
-      const rStandTop = isoToScreen(desk.x + 0.50, desk.y - 0.12, tableZ + 3);
+      // Right Monitor Stand & Screen (Moved forward away from seated agent)
+      const rStandBase = isoToScreen(desk.x + 0.58, desk.y + 0.14, tableZ);
+      const rStandTop = isoToScreen(desk.x + 0.58, desk.y + 0.14, tableZ + 3);
       ctx.beginPath();
       ctx.moveTo(rStandBase.x, rStandBase.y);
       ctx.lineTo(rStandTop.x, rStandTop.y);
       ctx.stroke();
 
-      // LEFT SCREEN (Primary Code & Specialist Output - Left Wing)
-      const mL_BL = isoToScreen(desk.x - 0.74, desk.y - 0.12, tableZ + 2.5);
-      const mL_BR = isoToScreen(desk.x - 0.28, desk.y - 0.12, tableZ + 2.5);
-      const mL_TR = isoToScreen(desk.x - 0.28, desk.y - 0.12, tableZ + 12.0);
-      const mL_TL = isoToScreen(desk.x - 0.74, desk.y - 0.12, tableZ + 12.0);
+      // LEFT SCREEN (Primary Code & Specialist Output - Left Wing, Moved Forward & Away)
+      const mL_BL = isoToScreen(desk.x - 0.82, desk.y + 0.14, tableZ + 2.5);
+      const mL_BR = isoToScreen(desk.x - 0.36, desk.y + 0.14, tableZ + 2.5);
+      const mL_TR = isoToScreen(desk.x - 0.36, desk.y + 0.14, tableZ + 12.0);
+      const mL_TL = isoToScreen(desk.x - 0.82, desk.y + 0.14, tableZ + 12.0);
 
       ctx.fillStyle = '#020617';
       ctx.beginPath();
@@ -4406,7 +4406,7 @@
           for (let col = 0; col < 3; col++) {
             const u = 0.2 + col * 0.3;
             const streamV = ((globalTick * 0.08 + col * 0.33) % 1.0);
-            const pRain = isoToScreen(desk.x - 0.70 + u * 0.40, desk.y - 0.12, tableZ + 3.5 + streamV * 7.5);
+            const pRain = isoToScreen(desk.x - 0.78 + u * 0.40, desk.y + 0.14, tableZ + 3.5 + streamV * 7.5);
             ctx.fillStyle = '#34d399';
             ctx.fillRect(pRain.x, pRain.y, 2 * zoom, 3 * zoom);
           }
@@ -4418,8 +4418,8 @@
           ctx.quadraticCurveTo((mL_TL.x + mL_TR.x) / 2, (mL_TL.y + mL_TR.y) / 2 + 2 * zoom, mL_TR.x - 2 * zoom, mL_TR.y + 4 * zoom);
           ctx.stroke();
         } else if (isLead) {
-          const n1 = isoToScreen(desk.x - 0.62, desk.y - 0.12, tableZ + 9.5);
-          const n2 = isoToScreen(desk.x - 0.35, desk.y - 0.12, tableZ + 5.5);
+          const n1 = isoToScreen(desk.x - 0.70, desk.y + 0.14, tableZ + 9.5);
+          const n2 = isoToScreen(desk.x - 0.44, desk.y + 0.14, tableZ + 5.5);
           ctx.fillStyle = '#38bdf8';
           ctx.fillRect(n1.x - 3 * zoom, n1.y - 2 * zoom, 6 * zoom, 4 * zoom);
           ctx.fillStyle = '#10b981';
@@ -4434,8 +4434,8 @@
           const vuColors = ['#10b981', '#34d399', '#fde047', '#ef4444'];
           for (let bar = 0; bar < 3; bar++) {
             const barH = 2 + Math.abs(Math.sin(globalTick * 0.15 + bar)) * 5;
-            const bB = isoToScreen(desk.x - 0.62 + bar * 0.12, desk.y - 0.12, tableZ + 3.5);
-            const bT = isoToScreen(desk.x - 0.62 + bar * 0.12, desk.y - 0.12, tableZ + 3.5 + barH);
+            const bB = isoToScreen(desk.x - 0.70 + bar * 0.12, desk.y + 0.14, tableZ + 3.5);
+            const bT = isoToScreen(desk.x - 0.70 + bar * 0.12, desk.y + 0.14, tableZ + 3.5 + barH);
             ctx.strokeStyle = vuColors[bar % vuColors.length];
             ctx.lineWidth = 2.2 * zoom;
             ctx.beginPath();
@@ -4446,8 +4446,8 @@
         } else {
           const codeColors = ['#f59e0b', '#38bdf8', '#ec4899', '#34d399', '#f8fafc'];
           for (let line = 0; line < 3; line++) {
-            const lB = isoToScreen(desk.x - 0.66, desk.y - 0.12, tableZ + 9.5 - line * 2.2);
-            const lE = isoToScreen(desk.x - 0.35, desk.y - 0.12, tableZ + 9.5 - line * 2.2);
+            const lB = isoToScreen(desk.x - 0.74, desk.y + 0.14, tableZ + 9.5 - line * 2.2);
+            const lE = isoToScreen(desk.x - 0.44, desk.y + 0.14, tableZ + 9.5 - line * 2.2);
             ctx.strokeStyle = codeColors[(line + Math.floor(globalTick * 0.05)) % codeColors.length];
             ctx.lineWidth = 1.6 * zoom;
             ctx.beginPath();
@@ -4467,11 +4467,11 @@
         ctx.fill();
       }
 
-      // RIGHT SCREEN (Secondary Telemetry & System Stream - Right Wing)
-      const mR_BL = isoToScreen(desk.x + 0.28, desk.y - 0.12, tableZ + 2.5);
-      const mR_BR = isoToScreen(desk.x + 0.74, desk.y - 0.12, tableZ + 2.5);
-      const mR_TR = isoToScreen(desk.x + 0.74, desk.y - 0.12, tableZ + 12.0);
-      const mR_TL = isoToScreen(desk.x + 0.28, desk.y - 0.12, tableZ + 12.0);
+      // RIGHT SCREEN (Secondary Telemetry & System Stream - Right Wing, Moved Forward & Away)
+      const mR_BL = isoToScreen(desk.x + 0.36, desk.y + 0.14, tableZ + 2.5);
+      const mR_BR = isoToScreen(desk.x + 0.82, desk.y + 0.14, tableZ + 2.5);
+      const mR_TR = isoToScreen(desk.x + 0.82, desk.y + 0.14, tableZ + 12.0);
+      const mR_TL = isoToScreen(desk.x + 0.36, desk.y + 0.14, tableZ + 12.0);
 
       ctx.fillStyle = '#020617';
       ctx.beginPath();
@@ -4487,17 +4487,17 @@
 
       if (isWorking) {
         ctx.fillStyle = '#06b6d4';
-        const rMid = isoToScreen(desk.x + 0.50, desk.y - 0.12, tableZ + 7.2);
+        const rMid = isoToScreen(desk.x + 0.58, desk.y + 0.14, tableZ + 7.2);
         ctx.beginPath();
         ctx.arc(rMid.x, rMid.y, 2 * zoom, 0, Math.PI * 2);
         ctx.fill();
       }
 
-      // 2. Custom Backlit Mechanical Keyboard & Mouse (In Front of Agent at North edge)
-      const kNW = isoToScreen(desk.x - 0.18, desk.y - 0.20, tableZ + 0.5);
-      const kNE = isoToScreen(desk.x + 0.18, desk.y - 0.20, tableZ + 0.5);
-      const kSE = isoToScreen(desk.x + 0.18, desk.y - 0.04, tableZ + 0.5);
-      const kSW = isoToScreen(desk.x - 0.18, desk.y - 0.04, tableZ + 0.5);
+      // 2. Custom Backlit Mechanical Keyboard & Mouse (In Front of Seated Agent on Near Edge)
+      const kNW = isoToScreen(desk.x - 0.18, desk.y - 0.12, tableZ + 0.5);
+      const kNE = isoToScreen(desk.x + 0.18, desk.y - 0.12, tableZ + 0.5);
+      const kSE = isoToScreen(desk.x + 0.18, desk.y + 0.04, tableZ + 0.5);
+      const kSW = isoToScreen(desk.x - 0.18, desk.y + 0.04, tableZ + 0.5);
 
       ctx.fillStyle = '#1e293b';
       ctx.beginPath();
@@ -4519,7 +4519,7 @@
       ctx.stroke();
 
       // Ergonomic Mouse
-      const mouseP = isoToScreen(desk.x + 0.24, desk.y - 0.14, tableZ + 0.5);
+      const mouseP = isoToScreen(desk.x + 0.24, desk.y - 0.04, tableZ + 0.5);
       ctx.fillStyle = '#475569';
       ctx.beginPath();
       ctx.ellipse(mouseP.x, mouseP.y, 2.2 * zoom, 1.6 * zoom, ROOM_ANGLE, 0, Math.PI * 2);
@@ -4527,7 +4527,7 @@
 
       // 3. Specialist Desk Gear & Accessories
       // Ceramic Coffee Mug
-      const mugP = isoToScreen(desk.x - 0.36, desk.y + 0.18, tableZ + 0.5);
+      const mugP = isoToScreen(desk.x - 0.24, desk.y + 0.24, tableZ + 0.5);
       ctx.fillStyle = isLead ? '#d97706' : (isHunter ? '#10b981' : '#f8fafc');
       ctx.beginPath();
       ctx.arc(mugP.x, mugP.y, 2.0 * zoom, 0, Math.PI * 2);
@@ -4535,7 +4535,7 @@
 
       // Claude's Brass Banker's Lamp
       if (isLead) {
-        const lampP = isoToScreen(desk.x + 0.65, desk.y + 0.18, tableZ);
+        const lampP = isoToScreen(desk.x + 0.72, desk.y + 0.28, tableZ);
         ctx.strokeStyle = '#f59e0b';
         ctx.lineWidth = 1.6 * zoom;
         ctx.beginPath();
@@ -4551,7 +4551,7 @@
       if (isAva) {
         const fanColors = ['#f43f5e', '#a855f7', '#38bdf8', '#10b981'];
         fanColors.forEach((fc, fIdx) => {
-          const swP = isoToScreen(desk.x - 0.65 + fIdx * 0.08, desk.y + 0.20, tableZ + 0.5);
+          const swP = isoToScreen(desk.x - 0.65 + fIdx * 0.08, desk.y + 0.28, tableZ + 0.5);
           ctx.fillStyle = fc;
           ctx.fillRect(swP.x - 2 * zoom, swP.y - 2 * zoom, 4 * zoom, 2.5 * zoom);
         });
@@ -4559,7 +4559,7 @@
 
       // Victor's Mini Oscilloscope
       if (isVictor) {
-        const oscP = isoToScreen(desk.x + 0.55, desk.y + 0.18, tableZ + 0.5);
+        const oscP = isoToScreen(desk.x + 0.62, desk.y + 0.28, tableZ + 0.5);
         ctx.fillStyle = '#0f172a';
         ctx.fillRect(oscP.x - 4 * zoom, oscP.y - 8 * zoom, 8 * zoom, 6 * zoom);
         ctx.strokeStyle = isWorking ? '#10b981' : '#334155';
@@ -4569,7 +4569,7 @@
 
       // Archie's Documentation Folio & Binders
       if (isArchie) {
-        const docP = isoToScreen(desk.x - 0.62, desk.y + 0.20, tableZ + 0.5);
+        const docP = isoToScreen(desk.x - 0.65, desk.y + 0.28, tableZ + 0.5);
         ctx.fillStyle = '#1e1b4b';
         ctx.fillRect(docP.x - 3 * zoom, docP.y - 3 * zoom, 6 * zoom, 5 * zoom);
       }
@@ -4588,8 +4588,8 @@
       const leftTapZ = (isWorking && Math.sin(globalTick * speedFactor) > 0) ? 0.3 : 0;
       const rightTapZ = (isWorking && Math.cos(globalTick * speedFactor) > 0) ? 0.3 : 0;
 
-      const leftWrist = isoToScreen(desk.x - 0.10, desk.y - 0.12, tableZ + 0.8 + leftTapZ);
-      const rightWrist = isoToScreen(desk.x + 0.08, desk.y - 0.12, tableZ + 0.8 + rightTapZ);
+      const leftWrist = isoToScreen(desk.x - 0.09, desk.y - 0.04, tableZ + 0.8 + leftTapZ);
+      const rightWrist = isoToScreen(desk.x + 0.08, desk.y - 0.04, tableZ + 0.8 + rightTapZ);
 
       // Sleeves
       ctx.fillStyle = sleeveColor;
